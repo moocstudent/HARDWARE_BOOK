@@ -86,7 +86,7 @@ const UI = {
   /* sections */
   sec01:       { zh: "学习路线图", en: "Learning roadmap" },
   sec01_aside: { zh: "从基础电学一路到通信总线", en: "From basic circuits to communication buses" },
-  sec02:       { zh: "六大模块", en: "Six modules" },
+  sec02:       { zh: "七大模块", en: "Seven modules" },
   sec02_aside: { zh: "点击进入任意模块", en: "Click any module to enter" },
   sec03:       { zh: "学习方法", en: "The method" },
   sec03_aside: { zh: "先原理,再仿真,后硬件", en: "Principle, then simulation, then silicon" },

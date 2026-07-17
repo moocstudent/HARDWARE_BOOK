@@ -63,6 +63,15 @@ const MODULES = [
       en: "Almost every module hangs off a bus. UART's point-to-point async serial, I²C's two-wire multi-drop, SPI's fast four-wire full-duplex — learn their timing and trade-offs and you can read the comms section of any datasheet.",
     },
   },
+  {
+    id: "h7", code: "H7", accent: "accent", level: 3,
+    zh: "智能护理床(项目)", en: "Smart Care Bed (Capstone)",
+    tagline: { zh: "把所学的传感器与总线,变成一张会「读」病人的床。", en: "Turn every sensor and bus you've learned into a bed that reads the patient." },
+    description: {
+      zh: "一个把全课程串起来的实战项目:用床脚的称重传感器听呼吸与心跳、用压力阵列与 IMU 判断翻身与离床、用湿度电极监测尿床,再加上供电、隔离与患者安全。全部基于可现货采购的原型级器件——同时讲清「要做成真正的医疗产品还差什么」。",
+      en: "A hands-on project that ties the whole course together: hear breathing and heartbeat from load cells under the bed legs, detect turning and bed-exit with a pressure array and IMU, catch bed-wetting with moisture electrodes — plus power, isolation and patient safety. Built from off-the-shelf, purchasable prototype parts — and honest about what it would take to become a real medical device.",
+    },
+  },
 ];
 
 const CHAPTERS = [
@@ -495,6 +504,113 @@ const CHAPTERS = [
       { zh: "移位寄存器:同时收发", en: "Shift registers: send and receive at once" },
       { zh: "片选与多从机", en: "Chip-select and multiple slaves" },
       { zh: "时钟极性与相位", en: "Clock polarity and phase" },
+    ],
+  },
+
+  /* ============ H7 智能护理床(项目) ============ */
+  {
+    id: "mb1", code: "CB1", moduleId: "h7", difficulty: 2, hours: 4, prereq: ["u2", "c2"], viz: null,
+    parts: ["Raspberry Pi 5", "ESP32", "以太网 / Ethernet"],
+    title: { zh: "系统架构与物料清单", en: "System Architecture & BOM" },
+    summary: {
+      zh: "先看全局:一台树莓派做大脑,多个 ESP32 节点做感官,如何分工、如何组成一份可现货采购的物料清单。",
+      en: "The big picture first: a Raspberry Pi as the brain, ESP32 nodes as the senses — how they split the work and form an off-the-shelf, purchasable bill of materials.",
+    },
+    objectives: [
+      { zh: "理解「主控 + 传感器节点」的分层架构", en: "Understand the layered 'controller + sensor node' architecture" },
+      { zh: "分清树莓派与 ESP32 各自的角色", en: "Tell apart the roles of the Pi and the ESP32" },
+      { zh: "读懂一份原型级 BOM 的组织方式", en: "Read how a prototype-grade BOM is organised" },
+      { zh: "知道现货采购渠道与选型思路", en: "Know the sourcing channels and selection logic" },
+    ],
+    outline: [
+      { zh: "分层:边缘采样 vs 融合与界面", en: "Layers: edge sampling vs fusion and UI" },
+      { zh: "核心计算与通信模块", en: "The core compute and comms modules" },
+      { zh: "四类监测子系统概览", en: "Overview of the four monitoring subsystems" },
+      { zh: "原型级 BOM 与采购渠道", en: "The prototype BOM and where to buy" },
+    ],
+  },
+  {
+    id: "mb2", code: "CB2", moduleId: "h7", difficulty: 3, hours: 5, prereq: ["d4", "mb1"], viz: "bcg",
+    parts: ["称重传感器 / Load cell ×4", "HX711", "ADS1232", "INA333"],
+    title: { zh: "呼吸与心率:称重传感器 + BCG", en: "Breathing & Heart Rate: Load Cells + BCG" },
+    summary: {
+      zh: "床脚下的四个称重传感器,能称出体重里那一丝随心跳与呼吸起伏的微小变化——这就是心冲击图(BCG)。",
+      en: "Four load cells under the bed legs weigh the tiny ripple in body weight from each heartbeat and breath — that's ballistocardiography (BCG).",
+    },
+    objectives: [
+      { zh: "理解称重传感器(应变片全桥)的原理", en: "Understand the load cell (strain-gauge full bridge)" },
+      { zh: "理解 BCG:从体重信号里提取心跳与呼吸", en: "Understand BCG: extracting heartbeat and breathing from weight" },
+      { zh: "选择 24 位 ADC:HX711 vs ADS1232", en: "Choose a 24-bit ADC: HX711 vs ADS1232" },
+      { zh: "认识信号调理与噪声的重要性", en: "Appreciate signal conditioning and noise" },
+    ],
+    outline: [
+      { zh: "称重传感器与惠斯通电桥", en: "Load cells and the Wheatstone bridge" },
+      { zh: "四脚合成一个全桥,称总重", en: "Four legs into one bridge, weighing the total" },
+      { zh: "BCG:体重里的心跳与呼吸波", en: "BCG: heartbeat and breathing in the weight" },
+      { zh: "24 位 ADC 与信号调理", en: "The 24-bit ADC and signal conditioning" },
+    ],
+  },
+  {
+    id: "mb3", code: "CB3", moduleId: "h7", difficulty: 3, hours: 5, prereq: ["d4", "c2"], viz: "pressureMap",
+    parts: ["FSR / Velostat", "CD74HC4067", "MPU-6050", "BNO055"],
+    title: { zh: "翻身与体位:压力阵列 + IMU", en: "Turning & Posture: Pressure Array + IMU" },
+    summary: {
+      zh: "一张压力分布垫画出身体压在床上的「热力图」,配合 IMU 的姿态数据,判断病人翻身、体位与是否离床。",
+      en: "A pressure mat paints a heat-map of the body on the bed; combined with an IMU's orientation, it tells turning, posture and bed-exit.",
+    },
+    objectives: [
+      { zh: "理解 FSR/Velostat 力敏电阻的原理", en: "Understand FSR/Velostat force-sensing resistors" },
+      { zh: "用模拟多路复用器扫描传感器网格", en: "Scan a sensor grid with an analog multiplexer" },
+      { zh: "用 IMU 检测体位与翻身", en: "Detect posture and turning with an IMU" },
+      { zh: "把压力图与姿态融合成体位判断", en: "Fuse the pressure map and orientation into posture" },
+    ],
+    outline: [
+      { zh: "力敏电阻:压力越大电阻越小", en: "Force-sensing resistors: more pressure, less resistance" },
+      { zh: "行列网格与 CD74HC4067 扫描", en: "The row/column grid and CD74HC4067 scanning" },
+      { zh: "IMU:加速度计 + 陀螺仪 + 姿态融合", en: "IMU: accelerometer + gyro + fusion" },
+      { zh: "离床与压疮风险判断", en: "Bed-exit and pressure-injury risk" },
+    ],
+  },
+  {
+    id: "mb4", code: "CB4", moduleId: "h7", difficulty: 2, hours: 3, prereq: ["c2", "mb1"], viz: null,
+    parts: ["湿度电极 / Moisture electrode", "SHT40", "三防漆 / Conformal coating"],
+    title: { zh: "尿床与湿度监测", en: "Bed-Wetting & Moisture Sensing" },
+    summary: {
+      zh: "叉指电极感知潮湿、SHT40 交叉确认温湿度,既要灵敏又要耐腐蚀、可清洁——这是最贴近护理现场的细节。",
+      en: "Interdigitated electrodes sense wetness while an SHT40 cross-checks temperature and humidity — sensitive yet corrosion-resistant and cleanable, the detail closest to real care.",
+    },
+    objectives: [
+      { zh: "理解电阻式与电容式湿度感知", en: "Understand resistive vs capacitive moisture sensing" },
+      { zh: "用 SHT40 交叉确认「真湿」", en: "Confirm real wetness with an SHT40" },
+      { zh: "认识防腐蚀与可清洁设计", en: "Understand corrosion resistance and cleanability" },
+      { zh: "降低误报:阈值与确认逻辑", en: "Reduce false alarms with thresholds and confirmation" },
+    ],
+    outline: [
+      { zh: "叉指导电电极垫的原理", en: "How an interdigitated electrode pad works" },
+      { zh: "电容式 vs 电阻式:耐腐蚀之争", en: "Capacitive vs resistive: the corrosion trade-off" },
+      { zh: "SHT40(I²C)交叉验证", en: "SHT40 (I²C) cross-validation" },
+      { zh: "三防处理与可擦拭隔膜", en: "Conformal coating and a wipeable membrane" },
+    ],
+  },
+  {
+    id: "mb5", code: "CB5", moduleId: "h7", difficulty: 3, hours: 4, prereq: ["mb2", "mb3"], viz: null,
+    parts: ["医疗电源 / IEC 60601", "数字隔离器 / ADuM", "LiFePO4 + BMS", "CAN 收发器"],
+    title: { zh: "供电、隔离与患者安全", en: "Power, Isolation & Patient Safety" },
+    summary: {
+      zh: "只要接触病人,安全就压倒一切:隔离供电、数字隔离器、备用电池,以及从「原型」走到「受监管医疗产品」到底还差什么。",
+      en: "The moment it touches a patient, safety outranks everything: isolated power, digital isolators, battery backup — and honestly, what separates a prototype from a regulated medical device.",
+    },
+    objectives: [
+      { zh: "理解患者隔离与漏电流为何是底线", en: "Understand why patient isolation and leakage current are the bottom line" },
+      { zh: "认识隔离电源与数字隔离器", en: "Understand isolated supplies and digital isolators" },
+      { zh: "用备用电池保证断电不中断", en: "Keep running through power loss with a backup battery" },
+      { zh: "看清原型与合规产品之间的差距", en: "See the gap between a prototype and a compliant product" },
+    ],
+    outline: [
+      { zh: "为什么医疗电子必须隔离", en: "Why medical electronics must be isolated" },
+      { zh: "隔离电源、隔离放大器与数字隔离器", en: "Isolated power, isolation amps and digital isolators" },
+      { zh: "备用电池 + BMS 与多床 CAN 组网", en: "Battery + BMS backup and multi-bed CAN networking" },
+      { zh: "从原型到 IEC 60601 合规", en: "From prototype to IEC 60601 compliance" },
     ],
   },
 ];

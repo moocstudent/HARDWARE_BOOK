@@ -680,6 +680,124 @@ function I2cFrameViz() {
   );
 }
 
+/* ============================================================
+   H7 · Ballistocardiography — heartbeat + breathing in weight
+   ============================================================ */
+function BcgViz() {
+  const [hr, setHr] = React.useState(72);    // beats per minute
+  const [rr, setRr] = React.useState(15);    // breaths per minute
+  const draw = (ctx, W, H) => {
+    const C = COLORS();
+    const pad = 40;
+    drawAxes(ctx, W, H, pad, C);
+    const plotW = W - pad * 1.4, plotH = H - pad * 1.6, midY = H - pad - plotH / 2;
+    const seconds = 10, N = 600;
+    // respiration: slow sine; heartbeat: periodic sharp pulses; small noise
+    const beatT = 60 / hr, respT = 60 / rr;
+    const pts = [];
+    for (let i = 0; i <= N; i++) {
+      const tt = seconds * i / N;
+      const resp = Math.sin((tt / respT) * 2 * Math.PI);            // ±1 slow
+      // heartbeat: a decaying pulse each beat period
+      const phase = (tt % beatT) / beatT;
+      const beat = Math.exp(-Math.pow((phase - 0.12) * 6, 2)) * 0.9
+                 - Math.exp(-Math.pow((phase - 0.22) * 7, 2)) * 0.45;
+      const noise = (Math.sin(tt * 53.1) + Math.sin(tt * 91.7)) * 0.02;
+      pts.push(resp * 0.55 + beat * 0.5 + noise);
+    }
+    // draw composite
+    ctx.strokeStyle = C.accent; ctx.lineWidth = 2; ctx.beginPath();
+    pts.forEach((v, i) => {
+      const px = pad + plotW * (i / N);
+      const py = midY - (plotH / 2) * v;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+    // mark detected beats
+    ctx.fillStyle = C.primary;
+    for (let tb = beatT * 0.12; tb < seconds; tb += beatT) {
+      const px = pad + plotW * (tb / seconds);
+      ctx.beginPath(); ctx.arc(px, pad * 0.7, 3, 0, 7); ctx.fill();
+    }
+    ctx.fillStyle = C.muted; ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillText("● 检测到的心跳 / detected beats", pad + 12, pad * 0.7 + 4);
+    ctx.fillText("慢波=呼吸 / slow wave = breathing", pad + 4, H - pad + 14);
+    ctx.textAlign = "right"; ctx.fillText("10 s →", W - pad * 0.5, H - pad + 14); ctx.textAlign = "left";
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={230} />
+      <div className="viz-ctrl">
+        <Slider label="心率 HR" min={40} max={120} step={1} value={hr} onChange={setHr} unit=" bpm" />
+        <Slider label="呼吸 RR" min={8} max={30} step={1} value={rr} onChange={setRr} unit=" /min" />
+      </div>
+      <div className="viz-readout">
+        床脚称重信号 = 呼吸慢波 + 心跳脉冲。心率 <b>{hr} bpm</b>、呼吸 <b>{rr} /min</b> —
+        BCG 就是从体重的 <b>&lt;1%</b> 起伏里把这两者分离出来。
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   H7 · Pressure map — posture / turning / bed-exit
+   ============================================================ */
+function PressureMapViz() {
+  const [posture, setPosture] = React.useState(0);   // -100 left .. 0 supine .. +100 right
+  const [present, setPresent] = React.useState(true);
+  const cols = 12, rows = 6;
+  const draw = (ctx, W, H) => {
+    const C = COLORS();
+    const pad = 16, gw = (W - pad * 2) / cols, gh = (H - pad * 2) / rows;
+    // body center shifts with posture; two "shoulders/hips" pressure blobs
+    const cx = cols / 2 + (posture / 100) * (cols * 0.28);
+    const blobs = present ? [
+      { x: cx, y: rows * 0.32, s: 2.1 },   // shoulders
+      { x: cx, y: rows * 0.68, s: 2.4 },   // hips (highest pressure)
+    ] : [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        let p = 0;
+        blobs.forEach((b) => {
+          const d2 = Math.pow(c + 0.5 - b.x, 2) + Math.pow(r + 0.5 - b.y, 2);
+          p += Math.exp(-d2 / b.s);
+        });
+        p = Math.min(1, p);
+        const x = pad + c * gw, y = pad + r * gh;
+        // background cell
+        ctx.fillStyle = C.surface; ctx.fillRect(x + 1, y + 1, gw - 2, gh - 2);
+        if (p > 0.04) {
+          ctx.globalAlpha = 0.15 + 0.85 * p;
+          ctx.fillStyle = p > 0.75 ? "#c0392b" : C.accent;
+          ctx.fillRect(x + 1, y + 1, gw - 2, gh - 2);
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+    // frame
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.strokeRect(pad, pad, cols * gw, rows * gh);
+  };
+  const label = !present ? "离床 / bed-exit ⚠"
+    : posture < -30 ? "左侧卧 / left-lying"
+    : posture > 30 ? "右侧卧 / right-lying"
+    : "仰卧 / supine";
+  const risk = present && Math.abs(posture) < 30 ? "长时间仰卧 → 需提醒翻身 / prompt a turn" : "压力分散良好 / pressure well spread";
+  return (
+    <div>
+      <Canvas draw={draw} height={200} />
+      <div className="viz-ctrl">
+        <Slider label="体位 posture" min={-100} max={100} step={1} value={posture} onChange={setPosture} fmt={(v) => v < -30 ? "左 L" : v > 30 ? "右 R" : "仰 ─"} />
+        <button className="btn" style={{ padding: "4px 12px" }} onClick={() => setPresent((p) => !p)}>
+          {present ? "模拟离床 / simulate exit" : "回到床上 / back in bed"}
+        </button>
+      </div>
+      <div className="viz-readout">
+        判定 / state: <b>{label}</b>　·　<b style={{ color: !present ? "#c0392b" : "var(--accent)" }}>{risk}</b>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- registry & dispatch ---------------- */
 const VIZ = {
   ohm: () => <OhmViz />,
@@ -694,6 +812,8 @@ const VIZ = {
   ultrasonic: () => <UltrasonicViz />,
   uartFrame: () => <UartFrameViz />,
   i2cFrame: () => <I2cFrameViz />,
+  bcg: () => <BcgViz />,
+  pressureMap: () => <PressureMapViz />,
 };
 
 function Viz({ name }) {
