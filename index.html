@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hans" data-lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>硬件自学 · self-taught hardware</title>
+<meta name="description" content="从欧姆定律、数字模拟 I/O 到微控制器、传感器与通信协议的中英双语硬件自学站,配可交互电路图。A bilingual, self-study site for electronics & embedded hardware — Ohm's law to microcontrollers, sensors and buses, with interactive circuit diagrams." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+  rel="stylesheet"
+/>
+
+<link rel="stylesheet" href="styles.css?v=1" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React + Babel (pinned) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+
+  <!-- App scripts (order matters). ?v bumped on each release to bust caches. -->
+  <script type="text/babel" src="i18n.jsx?v=1"></script>
+  <script type="text/babel" src="data.jsx?v=1"></script>
+  <script type="text/babel" src="viz.jsx?v=1"></script>
+  <script type="text/babel" src="pages.jsx?v=1"></script>
+  <script type="text/babel" src="app.jsx?v=1"></script>
+</body>
+</html>
