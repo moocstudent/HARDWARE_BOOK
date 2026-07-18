@@ -60,6 +60,7 @@ const UI = {
   nav_home:    { zh: "首页", en: "Home" },
   nav_about:   { zh: "关于", en: "About" },
   nav_bom:     { zh: "清单", en: "BOM" },
+  nav_projects:{ zh: "项目", en: "Projects" },
   lang_title:  { zh: "切换语言", en: "Switch language" },
   theme_title: { zh: "切换主题", en: "Toggle theme" },
 
@@ -184,6 +185,15 @@ const UI = {
     zh: "按路线图从上到下学:先打好模块一、二的电学与 I/O 基础,再进入微控制器与外设。读完一章就点「标记为已完成」,进度会保存在本地。",
     en: "Follow the roadmap top to bottom: lay the circuit and I/O foundations in modules one and two, then move on to microcontrollers and peripherals. Mark a chapter complete when you finish — progress is stored locally.",
   },
+
+  /* projects landing page */
+  proj_kicker:  { zh: "实战项目", en: "Hands-on Projects" },
+  proj_title:   { zh: "把原理,做成东西。", en: "Turn principle into things." },
+  proj_sub:     { zh: "两个把整门课串起来的实战项目:从传感到系统,从选型到编程。前面每一章学的电学、I/O、传感器与总线,在这里合成一件真正能用的作品。", en: "Two hands-on projects that tie the whole course together — from sensing to systems, from spec-picking to programming. Every circuit, I/O trick, sensor and bus from the earlier chapters comes together here into something that actually works." },
+  proj_enter:   { zh: "进入模块 →", en: "Enter module →" },
+  proj_bom_link:{ zh: "🖨 采购清单", en: "🖨 Shopping list" },
+  proj_chapters:{ zh: "章", en: "chapters" },
+  proj_note:    { zh: "两个项目都基于可现货采购的器件,面向学习与原型。医疗床项目非医疗器械;游戏机项目不提供任何 ROM/BIOS。", en: "Both projects use off-the-shelf, purchasable parts, for learning and prototyping. The care-bed project is not a medical device; the console project ships no ROMs/BIOS." },
 
   /* printable BOM shopping-list page */
   bom_kicker:   { zh: "物料清单 · 采购单", en: "Bill of Materials · Shopping List" },

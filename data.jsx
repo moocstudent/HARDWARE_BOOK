@@ -64,7 +64,7 @@ const MODULES = [
     },
   },
   {
-    id: "h7", code: "H7", accent: "accent", level: 3,
+    id: "h7", code: "H7", accent: "accent", level: 3, project: true,
     zh: "智能护理床(项目)", en: "Smart Care Bed (Capstone)",
     tagline: { zh: "把所学的传感器与总线,变成一张会「读」病人的床。", en: "Turn every sensor and bus you've learned into a bed that reads the patient." },
     description: {
@@ -73,7 +73,7 @@ const MODULES = [
     },
   },
   {
-    id: "h8", code: "H8", accent: "accent", level: 2,
+    id: "h8", code: "H8", accent: "accent", level: 2, project: true,
     zh: "掌上游戏机(项目)", en: "Handheld Game Console (Project)",
     tagline: { zh: "如何挑一台掌机,又如何让软件跑在上面。", en: "How to pick a handheld — and how software runs on it." },
     description: {

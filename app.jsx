@@ -59,6 +59,7 @@ const Nav = ({ progress, theme, toggleTheme, lang, toggleLang, nav, route }) => 
             {m.code}
           </a>
         ))}
+        <a className={route === "projects" ? "active" : ""} onClick={() => nav("#/projects")}>{t("nav_projects")}</a>
         <a className={route === "about" ? "active" : ""} onClick={() => nav("#/about")}>{t("nav_about")}</a>
         <a className={route === "bom" ? "active" : ""} onClick={() => nav("#/bom")} title={t("bom_title")}>{t("nav_bom")}</a>
       </nav>
@@ -93,13 +94,15 @@ const App = () => {
   if (hash.startsWith("#/c/")) { route = "course"; courseId = hash.slice(4); }
   else if (hash.startsWith("#/m/")) { route = "module"; moduleId = hash.slice(4); }
   else if (hash === "#/about") { route = "about"; }
+  else if (hash === "#/projects") { route = "projects"; }
   else if (hash === "#/bom") { route = "bom"; }
 
   const screenLabel = (() => {
     if (route === "home") return "01 Home · Roadmap";
     if (route === "module") { const m = MODULES.find((x) => x.id === moduleId); return m ? `02 Module · ${m.code} ${m.en}` : "02 Module"; }
     if (route === "course") { const c = CHAPTERS.find((x) => x.id === courseId); return c ? `03 Chapter · ${c.code} ${c.en}` : "03 Chapter"; }
-    if (route === "bom") return "05 BOM · Shopping list";
+    if (route === "projects") return "05 Projects";
+    if (route === "bom") return "06 BOM · Shopping list";
     return "04 About";
   })();
 
@@ -113,6 +116,7 @@ const App = () => {
         {route === "module" && <ModulePage moduleId={moduleId} progress={progress} nav={nav} />}
         {route === "course" && <ChapterPage courseId={courseId} progress={progress} toggleProgress={toggleProgress} nav={nav} />}
         {route === "about" && <AboutPage nav={nav} />}
+        {route === "projects" && <ProjectsPage nav={nav} />}
         {route === "bom" && <BomPage nav={nav} />}
       </div>
     </LangContext.Provider>

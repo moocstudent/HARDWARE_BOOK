@@ -490,6 +490,86 @@ const AboutPage = ({ nav }) => {
   );
 };
 
+// ============== PROJECTS landing ==============
+const ProjectsPage = ({ nav }) => {
+  const t = useT();
+  const lang = useLang();
+  const projects = MODULES.filter((m) => m.project);
+  return (
+    <div className="page">
+      <div className="container">
+        <div className="breadcrumb">
+          <a onClick={() => nav("#/")}>{t("bc_home")}</a>
+          <span className="sep">/</span>
+          <span style={{ color: "var(--ink)" }}>{t("nav_projects")}</span>
+        </div>
+
+        <section style={{ padding: "48px 0 8px", position: "relative" }}>
+          <div className="watermark" style={{ top: 8, right: -10, fontSize: "clamp(120px, 20vw, 260px)", opacity: 0.5 }}>★</div>
+          <div className="mono" style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--muted)" }}>{t("proj_kicker")}</div>
+          <h1 style={{ fontFamily: "Noto Serif SC, serif", fontSize: "clamp(38px, 6.5vw, 84px)", fontWeight: 500, lineHeight: 1.0, letterSpacing: "-0.02em", margin: "14px 0 10px", position: "relative", zIndex: 1 }}>
+            {t("proj_title")}
+          </h1>
+          <p style={{ maxWidth: 720, fontSize: 17, color: "var(--ink-soft)", lineHeight: 1.6 }}>{t("proj_sub")}</p>
+        </section>
+
+        <section className="proj-grid">
+          {projects.map((m, i) => {
+            const cs = CHAPTERS.filter((c) => c.moduleId === m.id);
+            const hours = cs.reduce((s, c) => s + c.hours, 0);
+            return (
+              <article key={m.id} className="proj-card" onClick={() => nav(`#/m/${m.id}`)}>
+                <div className="proj-top">
+                  <span className="proj-code mono">{m.code}</span>
+                  <span className="proj-idx serif">{["i", "ii", "iii", "iv"][i]}</span>
+                </div>
+                <h2 className="proj-zh">{pick(lang, m)}</h2>
+                <div className="proj-en">{other(lang, m)}.</div>
+                <div className="proj-tagline">「{pick(lang, m.tagline)}」</div>
+                <p className="proj-desc">{pick(lang, m.description)}</p>
+
+                <div className="proj-chaprow">
+                  {cs.map((c) => (
+                    <button key={c.id} className="proj-chip mono"
+                      title={pick(lang, c.title)}
+                      onClick={(e) => { e.stopPropagation(); nav(`#/c/${c.id}`); }}>
+                      {c.code}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="proj-foot">
+                  <span className="mono">{cs.length} {t("proj_chapters")} · {hours} {t("hours_unit")}</span>
+                  <span className="proj-actions">
+                    {m.id === "h7" && (
+                      <button className="btn" style={{ padding: "6px 12px", fontSize: 12 }}
+                        onClick={(e) => { e.stopPropagation(); nav("#/bom"); }}>
+                        {t("proj_bom_link")}
+                      </button>
+                    )}
+                    <button className="btn btn-accent" style={{ padding: "6px 14px", fontSize: 12 }}
+                      onClick={(e) => { e.stopPropagation(); nav(`#/m/${m.id}`); }}>
+                      {t("proj_enter")}
+                    </button>
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+
+        <p className="small" style={{ color: "var(--muted)", marginTop: 28, maxWidth: 760 }}>{t("proj_note")}</p>
+
+        <footer className="footer">
+          <span>{t("footer_tag")}</span>
+          <span>v1.0 · 2026</span>
+          <span>MIT License</span>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
 // ============== BOM (printable shopping list) ==============
 const BomPage = ({ nav }) => {
   const t = useT();
@@ -580,4 +660,5 @@ window.ModulePage = ModulePage;
 window.ChapterPage = ChapterPage;
 window.AboutPage = AboutPage;
 window.BomPage = BomPage;
+window.ProjectsPage = ProjectsPage;
 window.Prose = Prose;

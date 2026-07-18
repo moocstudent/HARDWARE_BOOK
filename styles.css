@@ -1991,3 +1991,57 @@ html[data-theme="dark"] .course-prose pre {
   .bom-group-title { border-color: #999; }
   a[href]::after { content: ""; }   /* no URL suffixes */
 }
+
+/* =============================================================
+   HARDWARE_BOOK — projects landing (#/projects)
+============================================================= */
+.proj-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 30px;
+}
+.proj-card {
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  padding: 28px 26px 22px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s, box-shadow .18s, background .18s;
+}
+.proj-card:hover {
+  transform: translateY(-3px);
+  background: var(--bg);
+  box-shadow: 10px 10px 0 var(--ink);
+}
+.proj-top { display: flex; align-items: baseline; justify-content: space-between; }
+.proj-code {
+  font-size: 12px; letter-spacing: 0.16em; color: var(--accent-ink);
+  background: var(--accent); padding: 3px 9px; border-radius: var(--radius);
+}
+.proj-idx { font-style: italic; font-size: 26px; color: var(--muted); }
+.proj-zh {
+  font-family: "Noto Serif SC", serif; font-size: 30px; font-weight: 600;
+  line-height: 1.1; margin: 18px 0 4px; letter-spacing: -0.01em;
+}
+.proj-en { font-family: var(--f-display); font-style: italic; font-size: 22px; color: var(--muted); }
+.proj-tagline { font-family: "Noto Serif SC", serif; font-size: 16px; color: var(--ink); margin: 14px 0 8px; }
+.proj-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 18px; flex: 1; }
+.proj-chaprow { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.proj-chip {
+  font-size: 11px; letter-spacing: 0.05em; padding: 4px 9px;
+  border: 1px solid var(--hairline-strong); background: transparent; color: var(--ink);
+  cursor: pointer; border-radius: var(--radius); transition: background .14s, color .14s, border-color .14s;
+}
+.proj-chip:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.proj-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-top: 16px; border-top: 1px solid var(--hairline-strong);
+  font-size: 12px; color: var(--muted); flex-wrap: wrap;
+}
+.proj-actions { display: inline-flex; gap: 8px; }
+@media (max-width: 820px) {
+  .proj-grid { grid-template-columns: 1fr; }
+}
