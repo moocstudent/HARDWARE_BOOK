@@ -59,6 +59,7 @@ const UI = {
   /* nav */
   nav_home:    { zh: "首页", en: "Home" },
   nav_about:   { zh: "关于", en: "About" },
+  nav_bom:     { zh: "清单", en: "BOM" },
   lang_title:  { zh: "切换语言", en: "Switch language" },
   theme_title: { zh: "切换主题", en: "Toggle theme" },
 
@@ -86,7 +87,7 @@ const UI = {
   /* sections */
   sec01:       { zh: "学习路线图", en: "Learning roadmap" },
   sec01_aside: { zh: "从基础电学一路到通信总线", en: "From basic circuits to communication buses" },
-  sec02:       { zh: "七大模块", en: "Seven modules" },
+  sec02:       { zh: "八大模块", en: "Eight modules" },
   sec02_aside: { zh: "点击进入任意模块", en: "Click any module to enter" },
   sec03:       { zh: "学习方法", en: "The method" },
   sec03_aside: { zh: "先原理,再仿真,后硬件", en: "Principle, then simulation, then silicon" },
@@ -183,6 +184,24 @@ const UI = {
     zh: "按路线图从上到下学:先打好模块一、二的电学与 I/O 基础,再进入微控制器与外设。读完一章就点「标记为已完成」,进度会保存在本地。",
     en: "Follow the roadmap top to bottom: lay the circuit and I/O foundations in modules one and two, then move on to microcontrollers and peripherals. Mark a chapter complete when you finish — progress is stored locally.",
   },
+
+  /* printable BOM shopping-list page */
+  bom_kicker:   { zh: "物料清单 · 采购单", en: "Bill of Materials · Shopping List" },
+  bom_title:    { zh: "智能护理床 · 采购清单", en: "Smart Care Bed · Shopping List" },
+  bom_sub:      { zh: "研究/原型级 BOM,均为现货,可从 Digi-Key、Mouser、亚马逊、Adafruit、SparkFun 采购。", en: "Research / prototype-grade BOM — all off-the-shelf from Digi-Key, Mouser, Amazon, Adafruit, SparkFun." },
+  bom_print:    { zh: "🖨 打印 / 存为 PDF", en: "🖨 Print / Save as PDF" },
+  bom_disclaimer: { zh: "⚠ 本清单为原型级器件,非医疗器械。走向受监管产品需替换为医疗级隔离器件并通过 IEC 60601 认证(见 CB5)。", en: "⚠ This list is prototype-grade and not a medical device. A regulated product needs medical-grade isolated parts and IEC 60601 certification (see CB5)." },
+  bom_col_item:  { zh: "元件", en: "Item" },
+  bom_col_model: { zh: "示例型号", en: "Example model" },
+  bom_col_qty:   { zh: "数量", en: "Qty" },
+  bom_col_note:  { zh: "用途 / 备注", en: "Purpose / Notes" },
+  bom_starter_only: { zh: "只看最小入门套件", en: "Starter kit only" },
+  bom_show_all:  { zh: "显示全部", en: "Show all" },
+  bom_starter_tag: { zh: "入门套件", en: "starter" },
+  bom_tier_optional: { zh: "可选", en: "optional" },
+  bom_tier_product:  { zh: "产品级", en: "product-grade" },
+  bom_starter_note: { zh: "「入门套件」是成本最低的可运行原型;带标记的行即属于它。", en: "The starter kit is the cheapest runnable prototype; tagged rows belong to it." },
+  bom_footer:   { zh: "硬件自学 · 智能护理床采购清单 · 原型级 · 非医疗器械", en: "self-taught hardware · Smart Care Bed shopping list · prototype-grade · not a medical device" },
 };
 
 window.LangContext = LangContext;

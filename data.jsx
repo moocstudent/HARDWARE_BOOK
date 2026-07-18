@@ -72,6 +72,15 @@ const MODULES = [
       en: "A hands-on project that ties the whole course together: hear breathing and heartbeat from load cells under the bed legs, detect turning and bed-exit with a pressure array and IMU, catch bed-wetting with moisture electrodes — plus power, isolation and patient safety. Built from off-the-shelf, purchasable prototype parts — and honest about what it would take to become a real medical device.",
     },
   },
+  {
+    id: "h8", code: "H8", accent: "accent", level: 2,
+    zh: "掌上游戏机(项目)", en: "Handheld Game Console (Project)",
+    tagline: { zh: "如何挑一台掌机,又如何让软件跑在上面。", en: "How to pick a handheld — and how software runs on it." },
+    description: {
+      zh: "换个角度:不再自己造硬件,而是学会「评估并驯服」一台成品设备。以 R36S 这类 Linux 掌上游戏机为例,读懂 SoC、屏幕、电池与手感的选型取舍,再拆解从固件、模拟器前端到 RetroArch 内核的软件栈,学会用 SD 卡布局、Wi-Fi/SSH、手柄映射对接程序,甚至跑自己写的代码。",
+      en: "A different angle: instead of building hardware, learn to evaluate and tame a finished device. Using a Linux handheld like the R36S, read the trade-offs in SoC, screen, battery and feel, then dissect the software stack from firmware to the emulator frontend and RetroArch cores — and learn to interface via SD-card layout, Wi-Fi/SSH and controller mapping, even running your own code.",
+    },
+  },
 ];
 
 const CHAPTERS = [
@@ -613,6 +622,152 @@ const CHAPTERS = [
       { zh: "从原型到 IEC 60601 合规", en: "From prototype to IEC 60601 compliance" },
     ],
   },
+
+  /* ============ H8 掌上游戏机(项目) ============ */
+  {
+    id: "gc1", code: "GC1", moduleId: "h8", difficulty: 2, hours: 3, prereq: [], viz: "emuPower",
+    parts: ["R36S", "RK3326", "IPS 640×480", "3500mAh"],
+    title: { zh: "选硬件:SoC、屏幕、电池、手感", en: "Choosing the Hardware: SoC, Screen, Battery, Feel" },
+    summary: {
+      zh: "买掌机不是看「预装多少游戏」,而是看 SoC 能模拟到哪一代、屏幕与手感能不能用得住。以 R36S 为标尺,学会读规格。",
+      en: "Buying a handheld isn't about how many games are preloaded — it's about which console generation the SoC can emulate, and whether the screen and feel hold up. Use the R36S as a yardstick for reading specs.",
+    },
+    objectives: [
+      { zh: "读懂 SoC 规格:核心、频率、GPU", en: "Read SoC specs: cores, clock, GPU" },
+      { zh: "把 SoC 性能对应到「能玩哪代主机」", en: "Map SoC power to 'which console generation runs'" },
+      { zh: "评估屏幕、电池、按键与散热", en: "Assess screen, battery, buttons and cooling" },
+      { zh: "识别克隆机与虚标,避坑", en: "Spot clones and inflated specs, avoid traps" },
+    ],
+    outline: [
+      { zh: "SoC 是心脏:以 RK3326 为例", en: "The SoC is the heart: RK3326 as example" },
+      { zh: "性能 vs 模拟世代:能玩到哪", en: "Power vs emulation era: how far you get" },
+      { zh: "屏幕、电池、手感与做工", en: "Screen, battery, feel and build" },
+      { zh: "真伪与虚标:采购避坑", en: "Authenticity and inflated specs" },
+    ],
+  },
+  {
+    id: "gc2", code: "GC2", moduleId: "h8", difficulty: 2, hours: 3, prereq: ["gc1"], viz: null,
+    parts: ["ArkOS", "JELOS", "microSD", "U-Boot"],
+    title: { zh: "系统与固件:Linux 与从 SD 启动", en: "OS & Firmware: Linux, Booting from SD" },
+    summary: {
+      zh: "这些掌机本质是一台跑 Linux 的小电脑。理解它如何从 SD 卡启动、为什么要刷第三方固件(ArkOS/JELOS),以及双卡槽的分工。",
+      en: "These handhelds are really little Linux computers. Understand how they boot from an SD card, why you'd flash third-party firmware (ArkOS/JELOS), and what the dual card slots are for.",
+    },
+    objectives: [
+      { zh: "理解「从 SD 卡启动」的引导流程", en: "Understand the boot-from-SD flow" },
+      { zh: "对比原厂固件与第三方固件", en: "Contrast stock vs third-party firmware" },
+      { zh: "认识 ArkOS / JELOS / AmberELEC", en: "Get to know ArkOS / JELOS / AmberELEC" },
+      { zh: "理解双 SD 卡槽:系统卡 vs 游戏卡", en: "Understand dual SD slots: OS card vs games card" },
+    ],
+    outline: [
+      { zh: "掌机 = 一台 Linux 小电脑", en: "The handheld = a little Linux computer" },
+      { zh: "SoC → U-Boot → 内核 → 前端 的启动链", en: "SoC → U-Boot → kernel → frontend boot chain" },
+      { zh: "刷固件:为什么与怎么做", en: "Flashing firmware: why and how" },
+      { zh: "双卡槽分工与备份", en: "Dual-slot roles and backups" },
+    ],
+  },
+  {
+    id: "gc3", code: "GC3", moduleId: "h8", difficulty: 2, hours: 4, prereq: ["gc2"], viz: null,
+    parts: ["EmulationStation", "RetroArch", "libretro", "BIOS / ROM"],
+    title: { zh: "模拟器栈:前端 + RetroArch/libretro", en: "The Emulation Stack: Frontend + RetroArch/libretro" },
+    summary: {
+      zh: "从你按下按键到游戏画面出现,中间隔着一整层软件:前端选游戏、RetroArch 载入内核、内核模拟主机。看懂这条栈,就会调、会修。",
+      en: "Between pressing a button and a game appearing sits a whole layer of software: a frontend to pick games, RetroArch to load a core, the core to emulate the console. Understand this stack and you can tune and fix it.",
+    },
+    objectives: [
+      { zh: "理解「前端 → RetroArch → 内核」的分层", en: "Understand the frontend → RetroArch → core layering" },
+      { zh: "认识 libretro 内核与如何选核", en: "Understand libretro cores and how to pick one" },
+      { zh: "搞懂 BIOS、ROM 与文件放置", en: "Sort out BIOS, ROMs and where files go" },
+      { zh: "会用即时存档、金手指、着色器", en: "Use save states, cheats and shaders" },
+    ],
+    outline: [
+      { zh: "前端 EmulationStation 的角色", en: "The role of the EmulationStation frontend" },
+      { zh: "RetroArch 与 libretro 内核", en: "RetroArch and libretro cores" },
+      { zh: "BIOS、ROM 与目录约定", en: "BIOS, ROMs and directory conventions" },
+      { zh: "存档、金手指、着色器与调优", en: "Saves, cheats, shaders and tuning" },
+    ],
+  },
+  {
+    id: "gc4", code: "GC4", moduleId: "h8", difficulty: 3, hours: 4, prereq: ["gc3"], viz: null,
+    parts: ["SSH", "Wi-Fi dongle", "Python", "GPIO"],
+    title: { zh: "对接与扩展:SD 布局、SSH、手柄、自编程序", en: "Interfacing & Extending: SD Layout, SSH, Gamepad, Your Code" },
+    summary: {
+      zh: "把掌机当成一台可编程的 Linux 设备:看懂 SD 卡目录结构,用 Wi-Fi + SSH 远程进去,理解手柄如何映射成输入,甚至跑上你自己写的程序。",
+      en: "Treat the handheld as a programmable Linux device: read the SD-card directory layout, get in remotely over Wi-Fi + SSH, understand how the gamepad maps to input, and even run your own programs on it.",
+    },
+    objectives: [
+      { zh: "读懂 SD 卡目录与 ROM/BIOS 放置", en: "Read the SD-card layout and where ROMs/BIOS go" },
+      { zh: "用 Wi-Fi + SSH 远程管理设备", en: "Manage the device remotely over Wi-Fi + SSH" },
+      { zh: "理解手柄如何映射成按键/事件", en: "Understand how the gamepad maps to buttons/events" },
+      { zh: "在掌机上运行自己的程序(Python 等)", en: "Run your own programs (Python, etc.) on the handheld" },
+    ],
+    outline: [
+      { zh: "SD 卡目录结构与文件传输", en: "SD-card layout and moving files" },
+      { zh: "联网:Wi-Fi 适配器与 SSH", en: "Networking: a Wi-Fi adapter and SSH" },
+      { zh: "输入:手柄映射与 evdev", en: "Input: gamepad mapping and evdev" },
+      { zh: "跑自己的代码,把它当计算机用", en: "Running your own code, using it as a computer" },
+    ],
+  },
+];
+
+// Structured bill of materials for the H7 Smart Care Bed — rendered on the
+// printable shopping-list page (#/bom). tier: core | optional | product.
+const CARE_BED_BOM = [
+  {
+    group: { zh: "核心计算与通信", en: "Core Compute & Comms" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "主控单板计算机", en: "Main single-board computer" }, model: { zh: "树莓派 5(4–8 GB)+ 电源 + microSD 卡", en: "Raspberry Pi 5 (4–8 GB) + PSU + microSD" }, qty: "1", note: { zh: "传感器融合、边缘 ML、界面、网络", en: "Sensor fusion, edge ML, UI, networking" } },
+      { starter: true, tier: "core", name: { zh: "传感器节点 MCU", en: "Sensor-node MCU" }, model: { zh: "ESP32-DevKitC(或 STM32 Nucleo)", en: "ESP32-DevKitC (or STM32 Nucleo)" }, qty: "1–3", note: { zh: "实时采样;ESP32 自带 Wi-Fi/BLE", en: "Real-time sampling; ESP32 has Wi-Fi/BLE" } },
+      { tier: "optional", name: { zh: "触摸屏(可选)", en: "Touchscreen (optional)" }, model: { zh: "7 英寸树莓派显示屏", en: "7-inch Raspberry Pi display" }, qty: "0–1", note: { zh: "本地床旁用户界面", en: "Local bedside UI" } },
+      { tier: "core", name: { zh: "网络", en: "Networking" }, model: { zh: "板载以太网 / Wi-Fi", en: "Onboard Ethernet / Wi-Fi" }, qty: "—", note: { zh: "上行网络连接", en: "Uplink connectivity" } },
+    ],
+  },
+  {
+    group: { zh: "呼吸 / 心率监测(BCG)", en: "Breathing / Heart Rate (BCG)" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "称重传感器 ×4", en: "Load cells ×4" }, model: { zh: "50 kg 半桥(合成全桥)或 4×200 kg 条形", en: "50 kg half-bridge (into a full bridge) or 4×200 kg bar" }, qty: "4", note: { zh: "每个床脚一个", en: "One under each bed leg" } },
+      { starter: true, tier: "core", name: { zh: "24 位 ADC", en: "24-bit ADC" }, model: { zh: "HX711(便宜)或 ADS1232 / ADS1220(更低噪声)", en: "HX711 (cheap) or ADS1232 / ADS1220 (lower noise)" }, qty: "1–4", note: { zh: "起步用 HX711;高质量 BCG 用 ADS1232", en: "Start with HX711; ADS1232 for quality BCG" } },
+      { tier: "optional", name: { zh: "仪表放大器(若不用 HX711)", en: "Instrumentation amp (if not HX711)" }, model: { zh: "INA125 / INA333", en: "INA125 / INA333" }, qty: "按需", note: { zh: "信号调理", en: "Signal conditioning" } },
+      { tier: "core", name: { zh: "安装五金件", en: "Mounting hardware" }, model: { zh: "称重传感器支脚/支架、隔离柱", en: "Load-cell feet/brackets, standoffs" }, qty: "4 套", note: { zh: "安装于每个床脚下", en: "Mount under each bed leg" } },
+    ],
+  },
+  {
+    group: { zh: "翻身 / 体位 / 离床", en: "Turning / Posture / Bed-exit" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "压力分布传感单元", en: "Pressure sensing" }, model: { zh: "FSR 阵列(Interlink 402/406)或 Velostat 薄膜 + 铜箔胶带", en: "FSR array (Interlink 402/406) or Velostat film + copper tape" }, qty: "1 网格", note: { zh: "正式产品用商用压力垫(Tekscan)", en: "Commercial pressure mat for product (Tekscan)" } },
+      { tier: "core", name: { zh: "模拟多路复用器", en: "Analog multiplexer" }, model: { zh: "CD74HC4067(16 通道)×N", en: "CD74HC4067 (16-channel) ×N" }, qty: "N", note: { zh: "扫描 FSR 网格的行/列", en: "Scan the FSR grid rows/columns" } },
+      { starter: true, tier: "core", name: { zh: "IMU 惯性测量单元", en: "IMU" }, model: { zh: "MPU-6050(经济型)或 BNO055 / ICM-20948(9 轴)", en: "MPU-6050 (economy) or BNO055 / ICM-20948 (9-axis)" }, qty: "1", note: { zh: "体位 + 翻身检测", en: "Posture + turning detection" } },
+    ],
+  },
+  {
+    group: { zh: "尿床 / 湿度监测", en: "Bed-wetting / Moisture" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "湿度 / 潮湿传感器", en: "Moisture sensor" }, model: { zh: "叉指导电电极垫,或电容式湿度传感器", en: "Interdigitated electrode pad, or a capacitive moisture sensor" }, qty: "1+", note: { zh: "电容式比电阻式更耐腐蚀", en: "Capacitive resists corrosion better than resistive" } },
+      { starter: true, tier: "core", name: { zh: "温度 + 湿度传感器", en: "Temp + humidity sensor" }, model: { zh: "SHT31 / SHT40(I²C 接口)", en: "SHT31 / SHT40 (I²C)" }, qty: "1", note: { zh: "确认真尿湿而非误触发", en: "Confirm real wetness vs false trigger" } },
+      { tier: "core", name: { zh: "防水处理", en: "Waterproofing" }, model: { zh: "三防漆、硅胶、可擦拭隔膜", en: "Conformal coating, silicone, wipeable membrane" }, qty: "1 套", note: { zh: "便于清洁", en: "For cleaning" } },
+    ],
+  },
+  {
+    group: { zh: "供电 / 隔离 / 安全 / 辅料", en: "Power / Isolation / Safety / Misc" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "隔离 DC-DC / 电源", en: "Isolated DC-DC / power" }, model: { zh: "原型:5 V/12 V;产品:IEC 60601-1 医疗电源(明纬 GST/RPS)", en: "Prototype: 5 V/12 V; product: IEC 60601-1 medical PSU (Mean Well GST/RPS)" }, qty: "1", note: { zh: "产品阶段必须医疗级", en: "Must be medical-grade for a product" } },
+      { tier: "product", name: { zh: "隔离放大器 / 数字隔离器", en: "Isolation amp / digital isolators" }, model: { zh: "ISO124,或 ADuM 数字隔离器(I²C/SPI)", en: "ISO124, or ADuM digital isolators (I²C/SPI)" }, qty: "按需", note: { zh: "患者安全隔离", en: "Patient-safety isolation" } },
+      { tier: "core", name: { zh: "ADC 转接板 / 原型板", en: "ADC breakout / proto board" }, model: { zh: "—", en: "—" }, qty: "按需", note: { zh: "接线用", en: "For wiring" } },
+      { tier: "core", name: { zh: "电平转换器", en: "Level shifter" }, model: { zh: "—", en: "—" }, qty: "按需", note: { zh: "3.3 V 与 5 V 混用时", en: "When mixing 3.3 V and 5 V" } },
+      { starter: true, tier: "core", name: { zh: "线材、连接器", en: "Wiring & connectors" }, model: { zh: "JST/Molex 端子、冷压头、跳线", en: "JST/Molex terminals, crimps, jumpers" }, qty: "1 套", note: { zh: "—", en: "—" } },
+      { tier: "optional", name: { zh: "CAN 收发器(可选)", en: "CAN transceiver (optional)" }, model: { zh: "SN65HVD230 / MCP2515", en: "SN65HVD230 / MCP2515" }, qty: "每节点 1", note: { zh: "串联多个床位节点", en: "Chain multiple bed nodes" } },
+      { tier: "core", name: { zh: "外壳", en: "Enclosure" }, model: { zh: "可擦拭 / 密封外壳", en: "Wipeable / sealed enclosure" }, qty: "1", note: { zh: "便于清洁", en: "For cleaning" } },
+      { tier: "optional", name: { zh: "备用电池 + 充电器", en: "Backup battery + charger" }, model: { zh: "磷酸铁锂电池组 + BMS", en: "LiFePO4 pack + BMS" }, qty: "1", note: { zh: "转运或断电时持续工作", en: "Keeps running on transfer / outage" } },
+    ],
+  },
+  {
+    group: { zh: "工作台 / 开发工具(一次性)", en: "Bench / Dev Tools (one-time)" },
+    items: [
+      { tier: "core", name: { zh: "基础工具", en: "Core tools" }, model: { zh: "万用表、台式电源、烙铁/焊台、面包板 + 跳线", en: "Multimeter, bench PSU, soldering iron/station, breadboard + jumpers" }, qty: "1 套", note: { zh: "—", en: "—" } },
+      { tier: "core", name: { zh: "调试仪器", en: "Debug instruments" }, model: { zh: "逻辑分析仪(Saleae 兼容)、示波器(或 USB 示波器)", en: "Logic analyzer (Saleae-compatible), oscilloscope (or USB scope)" }, qty: "1 套", note: { zh: "看时序与波形", en: "For timing and waveforms" } },
+      { tier: "core", name: { zh: "标定砝码", en: "Calibration weights" }, model: { zh: "已知质量的标定砝码", en: "Known-mass calibration weights" }, qty: "1 套", note: { zh: "校准称重传感器", en: "Calibrate the load cells" } },
+    ],
+  },
 ];
 
 // Aggregates used on the home hero.
@@ -623,3 +778,4 @@ window.MODULES = MODULES;
 window.CHAPTERS = CHAPTERS;
 window.TOTAL_HOURS = TOTAL_HOURS;
 window.ALL_PARTS = ALL_PARTS;
+window.CARE_BED_BOM = CARE_BED_BOM;

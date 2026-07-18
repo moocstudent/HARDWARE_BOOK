@@ -1907,3 +1907,87 @@ html[data-theme="dark"] .course-prose pre {
 @media (max-width: 720px) {
   .rm-row { grid-template-columns: 1fr; gap: 12px; }
 }
+
+/* =============================================================
+   HARDWARE_BOOK — printable BOM shopping-list page (#/bom)
+============================================================= */
+.bom-page { padding-bottom: 80px; }
+.bom-head { padding: 40px 0 24px; border-bottom: 2px solid var(--ink); }
+.bom-kicker { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.bom-h1 {
+  font-family: "Noto Serif SC", serif;
+  font-size: clamp(34px, 5.5vw, 60px);
+  font-weight: 500; line-height: 1.02; letter-spacing: -0.02em;
+  margin: 12px 0 8px;
+}
+.bom-sub { color: var(--ink-soft); max-width: 720px; font-size: 15px; }
+.bom-actions { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; flex-wrap: wrap; }
+.bom-count { color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }
+.bom-disclaimer {
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.bom-group { margin-top: 34px; break-inside: avoid; }
+.bom-group-title {
+  display: flex; align-items: baseline; gap: 12px;
+  font-family: "Noto Serif SC", serif; font-size: 22px; font-weight: 600;
+  margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--hairline-strong);
+}
+.bom-group-title .idx { font-size: 12px; color: var(--accent); letter-spacing: 0.1em; }
+
+.bom-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.bom-table th {
+  text-align: left; font-family: var(--f-mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  padding: 8px 10px; border-bottom: 1px solid var(--hairline-strong);
+}
+.bom-table td { padding: 11px 10px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+.bom-table tr, .bom-table tr { break-inside: avoid; }
+.bom-table .c-item { width: 26%; color: var(--ink); font-weight: 500; }
+.bom-table .c-model { width: 34%; font-size: 12.5px; color: var(--ink-soft); }
+.bom-table .c-qty { width: 8%; white-space: nowrap; color: var(--ink); }
+.bom-table .c-note { width: 32%; color: var(--muted); }
+.bom-table tbody tr.is-starter { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.bom-box { display: inline-block; margin-right: 7px; color: var(--muted); }
+.bom-tag {
+  display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 999px;
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  vertical-align: middle;
+}
+.bom-tag.starter { background: var(--accent); color: var(--accent-ink); }
+.bom-tag.opt { border: 1px solid var(--hairline-strong); color: var(--muted); }
+.bom-tag.prod { border: 1px solid var(--primary); color: var(--primary); }
+.bom-note { margin-top: 22px; color: var(--muted); }
+.bom-footer { margin-top: 40px; }
+
+@media (max-width: 720px) {
+  .bom-table, .bom-table thead, .bom-table tbody, .bom-table tr, .bom-table td, .bom-table th { display: block; }
+  .bom-table thead { display: none; }
+  .bom-table td { width: auto !important; border: none; padding: 3px 0; }
+  .bom-table tr { padding: 12px 4px; border-bottom: 1px solid var(--hairline); }
+  .bom-table .c-model::before { content: "型号 / model: "; color: var(--muted); }
+  .bom-table .c-qty::before { content: "数量 / qty: "; color: var(--muted); }
+}
+
+/* ---- Print: strip chrome, ink on white, keep the list ---- */
+@media print {
+  @page { margin: 14mm; }
+  html, body { background: #fff !important; color: #111 !important; font-size: 11pt; }
+  body::before { display: none !important; }              /* paper-grain overlay */
+  .nav, .ticker, .running-label, .no-print, .footer.bom-footer { display: none !important; }
+  .container { max-width: 100% !important; padding: 0 !important; }
+  .bom-head { border-color: #111; padding-top: 0; }
+  .bom-h1, .bom-group-title, .bom-table .c-item, .bom-table .c-qty { color: #000 !important; }
+  .bom-sub, .bom-table .c-model, .bom-table .c-note, .bom-count { color: #333 !important; }
+  .bom-disclaimer { background: #f2f2f2 !important; border-left-color: #000; color: #111 !important; }
+  .bom-table tbody tr.is-starter { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bom-tag { border-color: #999 !important; color: #222 !important; }
+  .bom-tag.starter { background: #ddd !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bom-group, .bom-table tr { break-inside: avoid; }
+  .bom-group-title { border-color: #999; }
+  a[href]::after { content: ""; }   /* no URL suffixes */
+}

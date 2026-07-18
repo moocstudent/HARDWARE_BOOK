@@ -798,6 +798,69 @@ function PressureMapViz() {
   );
 }
 
+/* ============================================================
+   H8 · Emulation power — SoC tier vs console generation
+   ============================================================ */
+function EmuPowerViz() {
+  const [tier, setTier] = React.useState(0);   // 0 entry, 1 mid, 2 high
+  const TIERS = [
+    { label: "入门 RK3326 (R36S)", cap: 2.6 },
+    { label: "中端 RK3566/H700", cap: 3.7 },
+    { label: "高端 RK3588/骁龙", cap: 6.2 },
+  ];
+  const SYS = [
+    { n: "NES / SNES / GB", d: 1.0 },
+    { n: "Genesis / GBA", d: 1.6 },
+    { n: "PS1", d: 2.3 },
+    { n: "Nintendo 64", d: 3.0 },
+    { n: "Dreamcast", d: 3.2 },
+    { n: "PSP", d: 3.5 },
+    { n: "Nintendo DS", d: 3.6 },
+    { n: "Saturn", d: 4.2 },
+    { n: "PlayStation 2", d: 5.2 },
+    { n: "GameCube / Wii", d: 5.8 },
+    { n: "Switch", d: 7.2 },
+  ];
+  const cap = TIERS[tier].cap;
+  const verdict = (m) => m >= 1.2 ? { t: "流畅 great", c: "primary" }
+    : m >= 0.1 ? { t: "可玩 playable", c: "accent" }
+    : m >= -0.9 ? { t: "吃力 struggles", c: "warn" }
+    : { t: "不行 no", c: "no" };
+  const draw = (ctx, W, H) => {
+    const C = COLORS();
+    const padL = 8, rowH = (H - 8) / SYS.length;
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    SYS.forEach((s, i) => {
+      const y = 4 + i * rowH, m = cap - s.d, v = verdict(m);
+      const col = v.c === "primary" ? C.primary : v.c === "accent" ? C.accent : v.c === "warn" ? "#b56b00" : "#c0392b";
+      // row background
+      ctx.fillStyle = C.surface; ctx.globalAlpha = i % 2 ? 0.5 : 0; ctx.fillRect(padL, y, W - padL * 2, rowH - 3); ctx.globalAlpha = 1;
+      // status pill
+      ctx.fillStyle = col; ctx.globalAlpha = 0.16; ctx.fillRect(W - 118, y + rowH / 2 - 10, 108, 20); ctx.globalAlpha = 1;
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(padL + 8, y + rowH / 2, 4, 0, 7); ctx.fill();
+      // system name
+      ctx.fillStyle = C.ink; ctx.textAlign = "left";
+      ctx.fillText(s.n, padL + 22, y + rowH / 2 + 4);
+      // verdict text
+      ctx.fillStyle = col; ctx.textAlign = "right";
+      ctx.fillText(v.t, W - 16, y + rowH / 2 + 4);
+    });
+    ctx.textAlign = "left";
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={300} />
+      <div className="viz-ctrl">
+        <Slider label="SoC 档次 / tier" min={0} max={2} step={1} value={tier} onChange={setTier} fmt={() => TIERS[tier].label} />
+      </div>
+      <div className="viz-readout">
+        以 <b>{TIERS[tier].label}</b> 为例:绿=流畅、橙=可玩、黄=吃力、红=跑不动。
+        R36S 属入门档,<b>PS1 及更早</b>基本流畅,N64/PSP/DS 视游戏而定,PS2 及以上超出能力。
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- registry & dispatch ---------------- */
 const VIZ = {
   ohm: () => <OhmViz />,
@@ -814,6 +877,7 @@ const VIZ = {
   i2cFrame: () => <I2cFrameViz />,
   bcg: () => <BcgViz />,
   pressureMap: () => <PressureMapViz />,
+  emuPower: () => <EmuPowerViz />,
 };
 
 function Viz({ name }) {

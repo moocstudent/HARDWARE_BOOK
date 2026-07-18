@@ -490,8 +490,94 @@ const AboutPage = ({ nav }) => {
   );
 };
 
+// ============== BOM (printable shopping list) ==============
+const BomPage = ({ nav }) => {
+  const t = useT();
+  const lang = useLang();
+  const [starterOnly, setStarterOnly] = React.useState(false);
+  const groups = CARE_BED_BOM.map((g) => ({
+    ...g,
+    items: starterOnly ? g.items.filter((it) => it.starter) : g.items,
+  })).filter((g) => g.items.length);
+  const totalRows = CARE_BED_BOM.reduce((s, g) => s + g.items.length, 0);
+  const starterRows = CARE_BED_BOM.reduce((s, g) => s + g.items.filter((i) => i.starter).length, 0);
+
+  return (
+    <div className="page bom-page">
+      <div className="container">
+        <div className="breadcrumb no-print">
+          <a onClick={() => nav("#/")}>{t("bc_home")}</a>
+          <span className="sep">/</span>
+          <a onClick={() => nav("#/m/h7")}>H7</a>
+          <span className="sep">/</span>
+          <span style={{ color: "var(--ink)" }}>{t("nav_bom")}</span>
+        </div>
+
+        <section className="bom-head">
+          <div className="mono bom-kicker">{t("bom_kicker")}</div>
+          <h1 className="bom-h1">{t("bom_title")}</h1>
+          <p className="bom-sub">{t("bom_sub")}</p>
+          <div className="bom-actions no-print">
+            <button className="btn btn-accent" onClick={() => window.print()}>{t("bom_print")}</button>
+            <button className={`btn ${starterOnly ? "btn-primary" : ""}`} onClick={() => setStarterOnly((s) => !s)}>
+              {starterOnly ? t("bom_show_all") : t("bom_starter_only")}
+            </button>
+            <span className="bom-count mono">
+              {starterOnly ? starterRows : totalRows} / {totalRows}
+            </span>
+          </div>
+          <div className="bom-disclaimer">{t("bom_disclaimer")}</div>
+        </section>
+
+        {groups.map((g, gi) => (
+          <section className="bom-group" key={gi}>
+            <h2 className="bom-group-title">
+              <span className="mono idx">{String(gi + 1).padStart(2, "0")}</span>
+              <span>{pick(lang, g.group)}</span>
+            </h2>
+            <table className="bom-table">
+              <thead>
+                <tr>
+                  <th className="c-item">{t("bom_col_item")}</th>
+                  <th className="c-model">{t("bom_col_model")}</th>
+                  <th className="c-qty">{t("bom_col_qty")}</th>
+                  <th className="c-note">{t("bom_col_note")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {g.items.map((it, ii) => (
+                  <tr key={ii} className={it.starter ? "is-starter" : ""}>
+                    <td className="c-item">
+                      <span className="bom-box" aria-hidden="true">☐</span>
+                      {pick(lang, it.name)}
+                      {it.starter && <span className="bom-tag starter">{t("bom_starter_tag")}</span>}
+                      {it.tier === "optional" && <span className="bom-tag opt">{t("bom_tier_optional")}</span>}
+                      {it.tier === "product" && <span className="bom-tag prod">{t("bom_tier_product")}</span>}
+                    </td>
+                    <td className="c-model mono">{pick(lang, it.model)}</td>
+                    <td className="c-qty">{it.qty}</td>
+                    <td className="c-note">{pick(lang, it.note)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))}
+
+        <p className="bom-note small">{t("bom_starter_note")}</p>
+
+        <footer className="footer bom-footer">
+          <span>{t("bom_footer")}</span>
+          <span>v1.0 · 2026</span>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
 window.HomePage = HomePage;
 window.ModulePage = ModulePage;
 window.ChapterPage = ChapterPage;
 window.AboutPage = AboutPage;
+window.BomPage = BomPage;
 window.Prose = Prose;
