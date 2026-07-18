@@ -145,4 +145,27 @@ Walk this flow and you truly feel that "same machine, same game, the right core 
 | No sound / crackling | RetroArch / performance | check audio settings; crackling is often insufficient compute |
 | Wrong buttons / can't exit | RetroArch input | reset button mapping, learn the hotkeys (Hotkey combos) |
 
+### One sentence per layer
+
+| Layer | One-sentence job | Typical symptom when it breaks |
+|---|---|---|
+| Frontend (ES) | let you browse, pick, launch | games missing, no box art |
+| RetroArch | unified menu, saves, mapping, shaders; dispatch cores | buttons, saves, menu related |
+| libretro core | actually emulate that console | stutter, compatibility, accuracy |
+| ROM | game data | missing file, wrong format |
+| BIOS | console firmware | whole console won't launch, black screen |
+
+Remember this "layer — job — symptom" map, and for any problem, first ask "which layer is this?", turning debugging from "random trials" into "follow the map".
+
+### Chapter quick reference
+
+| Item | Point |
+|---|---|
+| Three layers | frontend → RetroArch → core |
+| Fast-core key | dynamic recompilation (dynarec), ARM-optimised |
+| PS1 entry core | PCSX-ReARMed |
+| Top launch-failure cause | missing/wrong BIOS (filename/checksum must be exact) |
+| Stutter, try first | faster core → disable shaders → tune options → frameskip |
+| Common powers | save states, cheats, shaders, rewind |
+
 > ✦ **Key point:** the emulation stack is three layers: **the frontend (ES) picks the game → RetroArch dispatches and provides common features → a libretro core actually emulates a console → with ROM + BIOS supplying the data**. Practical knowledge: **one console has several cores, and picking the right one (especially a fast ARM-optimised core) turns stutter into smooth**; **a missing/wrong BIOS is the top cause of games not launching**; saves, cheats and shaders are RetroArch's common powers. This layering is universal across Linux handhelds.

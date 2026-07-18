@@ -138,4 +138,36 @@ The two most error-prone steps are "downloading the wrong firmware build" and "u
 | Games card space shrank | first boot didn't auto-expand / partition not filled | expand the partition with a tool, or reflash |
 | Want to revert after flashing | — | reflash the backup image from step 1 |
 
+### Going further: multi-system, backups and a "fearless" mindset
+
+Understand "the system is on the SD card" and you can play with more, and build a safe tinkering habit:
+
+- **Several system cards, swap at will**: prepare a few system cards flashed with ArkOS, JELOS, Batocera; swap on boot to change the whole system — compare, pick a UI by mood, all independent. The unique freedom "boot from SD" gives the player.
+- **Whole-card image backup**: before tinkering, use Win32DiskImager's "read image" to save the whole card as a `.img`. Break it someday and write it back for an instant return to a working state. Safer than a phone or an Arduino — **you almost can't truly brick it**.
+- **Back up saves separately**: the system can be reflashed, but a lost save is gone (see GC4). Build the habit of copying saves out regularly.
+- **Try on a cheap card first**: prove an important operation on an unimportant card before touching your main one.
+
+This "backup + reflashable" safety net is exactly why Linux handhelds suit learning and tinkering: **extremely cheap trial and error**. You can boldly modify and flash, since a break is recoverable — this "fearless" mindset is precisely the most valuable environment for learning hardware and Linux.
+
+### Common myths cleared up
+
+| Claim | Clarification |
+|---|---|
+| "Flashing bricks the machine" | the system is on the card; reflash to fix, almost never a brick |
+| "Third-party firmware is unsafe" | mainstream open firmware is mature and active, often better than stock |
+| "One dual slot is a spare" | not a spare, but OS card + games card division of labour |
+| "Changing firmware loses games" | games are on the games card; changing the OS card doesn't touch them |
+| "Black screen means bricked" | usually a firmware mismatch; re-download the right build |
+
+### Chapter quick reference
+
+| Item | Point |
+|---|---|
+| Essence | an ARM Linux computer booting from SD |
+| Boot chain | BootROM → U-Boot → kernel (+ device tree) → frontend |
+| Flashing tools | balenaEtcher / Raspberry Pi Imager |
+| Common firmware | ArkOS, JELOS/ROCKNIX, Batocera |
+| Black-screen first check | firmware matches the model/device tree? |
+| Dual slots | OS card (small) + games card (large) |
+
 > ✦ **Key point:** the handheld = a **Linux computer that boots from SD**, chain BootROM→U-Boot→kernel (with a matching **device tree**)→frontend. Because the system is on the card, flashing third-party firmware like **ArkOS / JELOS** renews it wholesale, and a bad flash is **recoverable by re-writing, no brick**. Use the **dual slots**: OS card separate from games card, so tinkering with the system leaves games alone. "The device tree must match the model" is the key to flashing without a black screen.

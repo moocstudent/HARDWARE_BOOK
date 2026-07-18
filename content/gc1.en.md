@@ -125,4 +125,28 @@ Finish these six steps and you've bought not "a box stuffed with games" but "a l
 | Is no built-in Wi-Fi a trap? | It's common — confirm in advance whether you need a separate USB-C adapter |
 | How to avoid clones/inflated specs? | Identify the SoC model, read third-party teardowns, pick models with active community support |
 
+### Spec quick reference: what each word really means
+
+Translate the common store-page specs into "the one thing you should actually care about":
+
+| Spec word | What to really look at |
+|---|---|
+| CPU core count | not the count — the **architecture (big/little) and per-core performance** |
+| Clock GHz | comparable only within one architecture; A35@1.5G ≠ A55@1.5G |
+| GPU | sets 3D ability; matters little for 2D classics |
+| RAM | ≥1GB for old generations; bigger is steadier for heavy emulation |
+| Screen resolution | match the game generation; higher isn't better |
+| Screen type | IPS beats TN; full lamination is clearer |
+| Battery mAh | read runtime with the SoC's draw, not the number alone |
+| Preloaded game count | a marketing number — **ignore** |
+| "Supports XX emulators" | supports ≠ smooth; can the SoC actually drive it? |
+
+### Three sentences to remember for buying
+
+1. **Which generation you can play = the SoC's per-core performance** — decide this first.
+2. **Whether it's good long-term = screen/feel/build/battery** — invisible on the spec page, found in reviews.
+3. **Avoiding a bad buy = identify the SoC model + check community activity** — ignore "10,000 games".
+
+When unsure, return to the most basic question: **"what do I mainly want to play?"** — the answer decides everything.
+
 > ✦ **Key point:** to choose a handheld, **first look at the SoC** — it decides "which generation it can emulate", and reading a SoC means looking at **architecture and per-core performance**, not core count and clock. The R36S (RK3326, quad A35) is a value pick for the PS1 era. **Second, look at screen, battery, feel and build** — the "feel" items absent from the spec page that most shape long-term use. Game count is marketing; the SoC tier, build and community support are the truth. Decide which generation you want to play, then pick to match.

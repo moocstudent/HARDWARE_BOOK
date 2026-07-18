@@ -148,4 +148,28 @@ For the pressure array, go further: get "pressure → value" working with a **si
 | FSR grid shows "ghosts" | scan crosstalk | add diode isolation or active scanning |
 | Same turn sometimes detected, sometimes not | threshold doesn't fit different people | self-calibrate, use relative change |
 
+### Going further: from "detection" to "machine learning"
+
+So far everything has been **rule-based**: set a threshold, watch a change, simple logic. That's fine to start, but real patients vary enormously and fixed rules easily miss cases. A step further is **machine learning**: collect lots of labelled data (this segment is supine, this a turn, this a bed-exit), train a classifier, and let it learn to judge posture from pressure-map + IMU features.
+
+This is exactly why CB1 uses the Pi as the "brain" — rule logic runs on an ESP32, but training/inference needs compute. A typical flow: nodes sample raw data → the Pi extracts features (center of pressure, distribution shape, orientation, rate of change) → feed a lightweight model (decision tree, small neural net) → output posture class and events. Understand the "rules to learning" progression and you see how deep this subsystem can go.
+
+### Going further: actively preventing pressure injuries
+
+Detection is only step one; the greater value is **intervention**. With a pressure map, the system can not only prompt "time to turn" but:
+
+- **Pressure-redistribution prompts**: point out "the sacrum has been under high pressure for 90 minutes", precise to the site, not just a generic timer.
+- **Paired with a dynamic mattress**: high-end care beds use zoned inflatable air cushions, and the system **automatically** adjusts each zone's pressure from the pressure map to shift load off high-risk points — evolving from "prompt a human to turn" to "the bed relieves pressure itself".
+
+This pushes the subsystem from "monitoring" toward "closed-loop control", stitching together the course's sensing and actuation (see the H5 actuators module).
+
+### Chapter quick reference
+
+| Quantity | Typical value/range | From |
+|---|---|---|
+| Turn-reminder interval | commonly 2 hours | clinical pressure-injury prevention |
+| CD74HC4067 channels | 16 (4 address lines) | multiplexing |
+| MPU-6050 I²C address | 0x68 | BUS2 |
+| High-risk pressure sites | sacrum, heels, hips, shoulders, back of head | pressure-injury-prone spots |
+
 > ✦ **Key point:** turning and posture use a **pressure array + IMU** as two safeguards. A pressure mat (FSR / Velostat) uses **voltage division** to turn pressure into voltage, then **row-by-row multiplexed scanning** into a heat-map; the IMU (accelerometer + gyro, fused) reports stable heading over **I²C**. Fusing them enables reliable **turn timing (prevent pressure injuries)**, **bed-exit alarms (prevent falls)** and posture recognition. Every single sensor has a blind spot — cross-validation is the key.

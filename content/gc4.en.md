@@ -184,4 +184,33 @@ Advanced: push a `hello.py` (say the gamepad-reading example above) and run it o
 | Script gone after reboot | read-only system, saved to a read-only area | save to the writable user/games partition (see GC2) |
 | Gamepad reads no events | wrong event device number | `ls /dev/input/` to find the right eventN, install the evdev library |
 
+### Project ideas: make it truly yours
+
+Having learned to interface, build something of your own to fully turn "user" into "owner":
+
+- **A one-tap organizer script**: a Python script that auto-sorts messy ROMs by console, batch-renames, removes duplicates.
+- **A custom launcher menu**: use Python + evdev to read the gamepad and build your own minimal launcher that jumps to your favourite games or tools.
+- **A status widget**: a floating info bar in a corner showing battery, time and CPU temperature.
+- **Port a small game**: cross-compile a Pygame game, copy it over, and play your own game with the gamepad.
+- **A hardware mod**: if the model breaks out GPIO, attach a sensor/light and put the course's GPIO and I²C back to use on this handheld — a neat full loop.
+
+These projects aren't hard, but they let you integrate the whole course (reading pins, buses, Linux, programming) on a real device.
+
+### Looking back at all of H8
+
+From reading specs in GC1, flashing systems in GC2, understanding the software stack in GC3, to logging in and programming in GC4, you've completed the full path from "evaluating" to "commanding" a finished device. It contrasts nicely with the H7 care-bed project: **H7 is "build hardware from scratch", H8 is "tame existing hardware"** — the two most common engineering situations, both rehearsed.
+
+And H8 especially echoes the course's throughline: a handheld looks like a toy but is a standard ARM Linux computer underneath; using the SoC, Linux, bus, GPIO and programming knowledge from before, you turn it from "playable only as the vendor intended" into "a general-purpose device you understand, modify and extend". **That is the ultimate meaning of "mastering hardware" — not being bound by a device's intended use.**
+
+### Chapter quick reference
+
+| Item | Point |
+|---|---|
+| ROM/BIOS location | `/roms/<console>/`, `/roms/bios/` |
+| Networking | USB-C Wi-Fi (a kernel-supported chip) |
+| Remote | SSH login, scp/Samba transfer |
+| Gamepad | kernel evdev abstracts to events → mapping table |
+| Run your own code | Python (+Pygame), native ARM ports |
+| Dev method | cross-compile: build on PC, transfer over |
+
 > ✦ **Key point:** treat the handheld as a programmable Linux device: the **SD layout** holds ROMs/BIOS per console; plug in **USB Wi-Fi** and manage/transfer via **SSH / scp / Samba**; the gamepad is abstracted by the kernel's **evdev** into events, mapped to buttons; and finally **run your own code (Python, etc.) on it**. Walk through these steps and you go from "user" to "developer who can modify and program it" — the end of this module and the course's arc from "reading a pin" to "writing a program".

@@ -158,4 +158,27 @@ If you ever really push it toward a product, this list helps you measure the gap
 | Can I certify it myself? | Compliance involves third-party testing and regulatory registration, far beyond solo DIY |
 | Then is prototyping even worth it? | Yes — it proves the principle, builds skill, makes a demo; just don't cross the "not a medical device" line |
 
+### Terminology quick reference
+
+Medical electronics has many acronyms; a table to align them:
+
+| Term | Meaning |
+|---|---|
+| Leakage current | unintended current through case/patient/earth, with strict limits |
+| Isolation | pass signal/energy but break the dangerous current loop |
+| MOP / MOPP / MOOP | means of protection / patient protection / operator protection |
+| Applied part B/BF/CF | protection grade of the patient-contacting part (CF highest) |
+| Single-fault safe | still safe with any one component failed |
+| IEC 60601-1 | general safety standard for medical electrical equipment |
+| IEC 60601-1-2 | electromagnetic compatibility (EMC) |
+| IEC 60601-1-8 | alarm systems |
+| ISO 14971 | medical-device risk management |
+| IEC 62304 | medical-software lifecycle |
+
+### Looking back at all of H7: a full rehearsal
+
+Here the smart-care-bed project completes: CB1 set the architecture, CB2 heard breathing and heartbeat, CB3 judged turning and bed-exit, CB4 sensed wetness, CB5 kept it safe. Looking back, it used nearly all of the first six modules — **dividers** read the moisture electrode, **the ADC** read load cells and pressure, **I²C** connected the IMU and temp-humidity sensor, **UART/CAN** carried comms, and **power and isolation** kept it safe — plus system-level engineering thinking: **fusion, alarms, reliability, compliance**.
+
+More importantly it teaches one thing: **building a real system, the hard part is never getting a sensor to spit out a number, but making the whole thing work reliably in a real, noisy, fault-prone, life-critical environment.** The sensor is the start; systems engineering and safety engineering are the finish. That is the divide between "can wire it up" and "can build a system".
+
 > ⚠ **Key point:** the first principle of medical electronics is **patient safety**: **isolate** the patient-contacting part from mains/earth and hold **leakage current** below the safe line — via isolated supplies and analog/digital isolators, making the patient side a floating electrical island. Keep running through outages with a **LiFePO4 battery + BMS**, and network multiple beds over **CAN**. Stay clear-eyed: a hobby prototype teaches the principles and demos well, but a whole layer of isolation, certification, EMC and safety engineering (the IEC 60601 series) still separates it from a compliant medical device.

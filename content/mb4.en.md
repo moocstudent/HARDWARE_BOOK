@@ -143,4 +143,25 @@ Feel the difference: with the electrode alone, a cold spill false-alarms; add th
 | Sweat/condensation false alarms | electrode as the only criterion | add SHT40 temp-humidity cross-check |
 | One wetting keeps alarming | no event de-duplication | after one alarm, enter a "known wet" state |
 
+### Going further: fitting into the care workflow
+
+For a bed-wetting sensor to truly ease the nursing burden, it can't just "beep" — it must fit a full care loop:
+
+- **Tiered notification**: a bedside indicator + a push to the nurses' station/phone, so staff out of the room learn of it promptly.
+- **Response acknowledgment**: staff can one-tap "handled" after dealing with it; the system resets and logs the response time.
+- **Trend logging**: count occurrences and time-of-night distribution to help assess the condition and adjust the care plan (e.g. timed nighttime toileting reminders).
+- **Interplay with other subsystems**: wetting often coincides with movement, so cross-referencing CB3's posture data reduces false alarms and gives a fuller picture.
+
+Only then does the humble "detect water" become a system of real care value — echoing the project's refrain: **the sensor is only the start; turning data into reliable, usable, workflow-integrated decisions and actions is the hard part.**
+
+### Chapter quick reference
+
+| Item | Point |
+|---|---|
+| Preferred principle | capacitive (corrosion-resistant, no liquid contact) |
+| Cross-confirmation | SHT40 (I²C), using temp + humidity to reject false alarms |
+| Real-wetness criteria | conducts + humidity spikes + temp ≈ body + large area |
+| Main false-alarm sources | sweat, cold spills, condensation |
+| Durability keys | conformal coating, silicone, wipeable membrane, replaceable |
+
 > ✦ **Key point:** bed-wetting monitoring = **interdigitated moisture electrodes** (capacitive preferred — not touching the liquid, hence more corrosion-resistant) + **an SHT40 temperature-humidity cross-check over I²C** (using "conducts + humidity rises + temp ≈ body" to reject sweat and spills), made durable and cleanable by **conformal coating, silicone and a wipeable membrane**. The core engineering challenge isn't "detecting water" but "alarming only on real wetness" — that's the value of sensor fusion and threshold confirmation. In care settings, durability and cleanability matter as much as accuracy.
