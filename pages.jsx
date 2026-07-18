@@ -274,7 +274,7 @@ const ModulePage = ({ moduleId, progress, nav }) => {
 
           {m.id === "h8" && (
             <div className="mod-model-showcase">
-              <div className="mms-head mono">{lang === "en" ? "3D model · RG35XX-style handheld" : "3D 模型 · RG35XX 造型掌机"}</div>
+              <div className="mms-head mono">{lang === "en" ? "3D model · R36S handheld (illustrative)" : "3D 模型 · R36S 掌机(示意)"}</div>
               <Viz name="consoleModel" />
             </div>
           )}
@@ -616,6 +616,8 @@ const BomPage = ({ nav }) => {
           <div className="bom-disclaimer">{t("bom_disclaimer")}</div>
         </section>
 
+        <h2 className="inv-section-head"><span>{t("inv_bed_head")}</span></h2>
+
         {groups.map((g, gi) => (
           <section className="bom-group" key={gi}>
             <h2 className="bom-group-title">
@@ -652,6 +654,45 @@ const BomPage = ({ nav }) => {
         ))}
 
         <p className="bom-note small">{t("bom_starter_note")}</p>
+
+        <h2 className="inv-section-head"><span>{t("inv_console_head")}</span></h2>
+        <p className="bom-sub" style={{ marginTop: 0 }}>{t("inv_console_sub")}</p>
+        <table className="bom-table console-table">
+          <thead>
+            <tr>
+              <th className="cc-name">{t("inv_c_console")}</th>
+              <th className="cc-soc">{t("inv_c_soc")}</th>
+              <th className="cc-tier">{t("inv_c_tier")}</th>
+              <th className="cc-plays">{t("inv_c_plays")}</th>
+              <th className="cc-specs">{t("inv_c_specs")}</th>
+              <th className="cc-note">{t("inv_c_note")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {GAME_CONSOLES.map((c, i) => (
+              <tr key={i} className={c.featured ? "is-featured" : ""}>
+                <td className="cc-name">
+                  {c.featured && <span className="bom-box" aria-hidden="true">☐</span>}
+                  {c.name}
+                  {c.featured && <span className="bom-tag starter">{t("inv_featured")}</span>}
+                </td>
+                <td className="cc-soc mono">{c.soc}</td>
+                <td className="cc-tier"><span className={`tier-pill tier-${c.tier}`}>{t(`inv_tier_${c.tier}`)}</span></td>
+                <td className="cc-plays">{pick(lang, c.plays)}</td>
+                <td className="cc-specs mono">{c.screen} · {c.ram} · {c.battery} · {c.os}</td>
+                <td className="cc-note">{pick(lang, c.note)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="bom-note small">
+          {lang === "en"
+            ? "The R36S is modeled in 3D in the "
+            : "R36S 的 3D 模型见 "}
+          <a style={{ color: "var(--accent)", borderBottom: "1px solid var(--hairline-strong)", cursor: "pointer" }} onClick={() => nav("#/m/h8")}>
+            {lang === "en" ? "H8 Handheld Game Console module" : "H8 掌上游戏机模块"}
+          </a>{lang === "en" ? "." : "。"}
+        </p>
 
         <footer className="footer bom-footer">
           <span>{t("bom_footer")}</span>

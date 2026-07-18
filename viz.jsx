@@ -889,7 +889,7 @@ function ConsoleModelViz() {
           style={{ width: "100%", height: "100%", objectFit: "contain" }} />
       </model-viewer>
       <div className="model3d-bar">
-        <span className="m3-hint">◍ {L("拖动旋转 · 滚轮缩放", "Drag to rotate · scroll to zoom")} · 82×130×16 mm</span>
+        <span className="m3-hint">◍ {L("拖动旋转 · 滚轮缩放 · R36S 示意模型", "Drag to rotate · scroll to zoom · R36S (illustrative model)")}</span>
         <span className="m3-dl">
           <span className="m3-dl-lbl">{L("下载 CAD", "Download CAD")}</span>
           <a href={base + "handheld_console.step"} download>STEP</a>

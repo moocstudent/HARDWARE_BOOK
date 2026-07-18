@@ -770,6 +770,48 @@ const CARE_BED_BOM = [
   },
 ];
 
+// Handheld game-console catalog for the inventory page (#/bom). Specs are
+// indicative, grounded in the H8 module (R36S is the reference device).
+// tier: entry | mid | high. featured marks the R36S (the module's 3D model).
+const GAME_CONSOLES = [
+  {
+    name: "R36S", featured: true, soc: "RK3326 · 4×A35 @1.5GHz", tier: "entry",
+    screen: "3.5\" IPS 640×480", ram: "~1 GB", battery: "3500 mAh", os: "ArkOS",
+    plays: { zh: "PS1 及更早(FC/SFC/GBA/街机/PS1)", en: "PS1 & earlier (NES/SNES/GBA/arcade/PS1)" },
+    note: { zh: "本模块的 3D 模型即以此机为原型;竖版、性价比之选", en: "This module's 3D model is based on it; portrait, value pick" },
+  },
+  {
+    name: "Anbernic RG351 系列", soc: "RK3326 · 4×A35", tier: "entry",
+    screen: "3.5\" 320×240 / 640×480", ram: "1 GB", battery: "~2500–3900 mAh", os: "ArkOS / JELOS",
+    plays: { zh: "PS1 及更早", en: "PS1 & earlier" },
+    note: { zh: "入门经典,固件社区成熟", en: "Classic entry, mature firmware community" },
+  },
+  {
+    name: "Anbernic RG35XX 系列", soc: "Allwinner H700 · 4×A53", tier: "mid",
+    screen: "3.5\" IPS 640×480", ram: "1 GB", battery: "~3300 mAh", os: "Linux / muOS",
+    plays: { zh: "+ 部分 PSP / N64 / DS", en: "+ some PSP / N64 / DS" },
+    note: { zh: "H700 芯,竖版/横版多款", en: "H700 chip, portrait/landscape variants" },
+  },
+  {
+    name: "Anbernic RG353 系列", soc: "RK3566 · 4×A55", tier: "mid",
+    screen: "3.5\" IPS 640×480", ram: "1–2 GB", battery: "~3200 mAh", os: "双系统 Android/Linux",
+    plays: { zh: "+ PSP / N64 / DS", en: "+ PSP / N64 / DS" },
+    note: { zh: "双系统,屏幕素质较好", en: "Dual-boot, better screen" },
+  },
+  {
+    name: "Retroid Pocket 系列(高端)", soc: "骁龙/联发科 Snapdragon-class", tier: "high",
+    screen: "4–5\" IPS/OLED", ram: "4–8 GB", battery: "~5000 mAh", os: "Android",
+    plays: { zh: "+ PS2 / GC / 部分 Switch", en: "+ PS2 / GC / some Switch" },
+    note: { zh: "安卓,性能强、可玩到较晚世代", en: "Android, powerful, reaches later generations" },
+  },
+  {
+    name: "AYN Odin 2", soc: "Snapdragon 8 Gen 2", tier: "high",
+    screen: "5–6\" 1080p", ram: "8–16 GB", battery: "~8000 mAh", os: "Android",
+    plays: { zh: "PS2 / GC / Wii U / Switch", en: "PS2 / GC / Wii U / Switch" },
+    note: { zh: "旗舰级性能", en: "Flagship performance" },
+  },
+];
+
 // Aggregates used on the home hero.
 const TOTAL_HOURS = CHAPTERS.reduce((s, c) => s + c.hours, 0);
 const ALL_PARTS = Array.from(new Set(CHAPTERS.flatMap((c) => c.parts || [])));
@@ -779,3 +821,4 @@ window.CHAPTERS = CHAPTERS;
 window.TOTAL_HOURS = TOTAL_HOURS;
 window.ALL_PARTS = ALL_PARTS;
 window.CARE_BED_BOM = CARE_BED_BOM;
+window.GAME_CONSOLES = GAME_CONSOLES;

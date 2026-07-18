@@ -2130,3 +2130,48 @@ html[data-theme="dark"] .course-prose pre {
 @media (max-width: 760px) {
   .model3d model-viewer { height: 300px; }
 }
+
+/* =============================================================
+   HARDWARE_BOOK — inventory: section headers + console table
+============================================================= */
+.inv-section-head {
+  font-family: "Noto Serif SC", serif;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 44px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+.console-table { margin-top: 14px; }
+.console-table .cc-name { width: 22%; color: var(--ink); font-weight: 500; }
+.console-table .cc-soc { width: 20%; font-size: 12px; color: var(--ink-soft); }
+.console-table .cc-tier { width: 9%; }
+.console-table .cc-plays { width: 17%; color: var(--muted); }
+.console-table .cc-specs { width: 20%; font-size: 11.5px; color: var(--ink-soft); }
+.console-table .cc-note { width: 12%; color: var(--muted); }
+.console-table tbody tr.is-featured { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.tier-pill {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid var(--hairline-strong); color: var(--ink-soft);
+}
+.tier-pill.tier-entry { border-color: var(--primary); color: var(--primary); }
+.tier-pill.tier-mid { border-color: var(--warn); color: var(--warn); }
+.tier-pill.tier-high { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+@media (max-width: 720px) {
+  .console-table, .console-table thead, .console-table tbody, .console-table tr, .console-table td, .console-table th { display: block; }
+  .console-table thead { display: none; }
+  .console-table td { width: auto !important; border: none; padding: 3px 0; }
+  .console-table tr { padding: 12px 4px; border-bottom: 1px solid var(--hairline); }
+  .console-table .cc-soc::before { content: "SoC: "; color: var(--muted); }
+  .console-table .cc-plays::before { content: "▶ "; color: var(--muted); }
+  .console-table .cc-specs::before { content: "· "; color: var(--muted); }
+}
+
+@media print {
+  .inv-section-head { border-color: #000; color: #000 !important; }
+  .console-table tbody tr.is-featured { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .tier-pill { border-color: #999 !important; color: #222 !important; background: transparent !important; }
+}
