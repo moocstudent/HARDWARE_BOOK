@@ -41,6 +41,40 @@ function useTheme() {
   return [theme, () => setTheme((t) => (t === "light" ? "dark" : "light"))];
 }
 
+// Dropdown holding the module codes (keeps the top nav compact).
+const ModulesMenu = ({ nav, route, lang }) => {
+  const t = useT();
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+  const go = (id) => { setOpen(false); nav(`#/m/${id}`); };
+  return (
+    <div className="modules-menu" ref={ref}>
+      <a className={`modules-trigger ${route === "module" ? "active" : ""}`} onClick={() => setOpen((o) => !o)}>
+        {t("nav_modules")} <span className={`caret ${open ? "up" : ""}`}>▾</span>
+      </a>
+      {open && (
+        <div className="modules-dropdown">
+          {MODULES.map((m) => {
+            const active = route === "module" && window.location.hash.includes("/" + m.id);
+            return (
+              <a key={m.id} className={`md-item ${active ? "active" : ""} ${m.project ? "is-project" : ""}`} onClick={() => go(m.id)}>
+                <span className="md-code mono">{m.code}</span>
+                <span className="md-name">{pick(lang, m)}</span>
+                {m.project && <span className="md-badge">★</span>}
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Nav = ({ progress, theme, toggleTheme, lang, toggleLang, nav, route }) => {
   const t = useT();
   const done = Object.values(progress).filter(Boolean).length;
@@ -52,13 +86,7 @@ const Nav = ({ progress, theme, toggleTheme, lang, toggleLang, nav, route }) => 
       </div>
       <nav className="nav-links">
         <a className={route === "home" ? "active" : ""} onClick={() => nav("#/")}>{t("nav_home")}</a>
-        {MODULES.map((m) => (
-          <a key={m.id} title={pick(lang, m)}
-            className={route === "module" && window.location.hash.includes("/" + m.id) ? "active" : ""}
-            onClick={() => nav(`#/m/${m.id}`)}>
-            {m.code}
-          </a>
-        ))}
+        <ModulesMenu nav={nav} route={route} lang={lang} />
         <a className={route === "projects" ? "active" : ""} onClick={() => nav("#/projects")}>{t("nav_projects")}</a>
         <a className={route === "about" ? "active" : ""} onClick={() => nav("#/about")}>{t("nav_about")}</a>
         <a className={route === "bom" ? "active" : ""} onClick={() => nav("#/bom")} title={t("bom_title")}>{t("nav_bom")}</a>

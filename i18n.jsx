@@ -61,6 +61,7 @@ const UI = {
   nav_about:   { zh: "关于", en: "About" },
   nav_bom:     { zh: "清单", en: "BOM" },
   nav_projects:{ zh: "项目", en: "Projects" },
+  nav_modules: { zh: "模块", en: "Modules" },
   lang_title:  { zh: "切换语言", en: "Switch language" },
   theme_title: { zh: "切换主题", en: "Toggle theme" },
 
