@@ -17,6 +17,8 @@ Built in the editorial style of the sibling **MATH_BOOK** project (beige paper, 
 | H7 | 智能护理床 · Smart Care Bed (project) | system & BOM · breathing/heart-rate (load cells + BCG) · turning/posture (pressure array + IMU) · bed-wetting & moisture · power/isolation & patient safety |
 | H8 | 掌上游戏机 · Handheld Game Console (project) | choosing hardware (SoC/screen/battery) · OS & firmware (Linux, boot-from-SD) · emulation stack (EmulationStation + RetroArch/libretro) · interfacing (SD layout, SSH, gamepad, your own code) |
 
+The H8 module features an **interactive 3D model** of a parametric RG35XX-style handheld (82×130×16 mm) rendered with Google `model-viewer` (orbit/zoom, iso-render poster fallback), plus downloadable CAD in STEP/STL/3MF/GLB/build123d-`.py`. Assets live in `assets/handheld/`.
+
 All 29 chapters have full bilingual "Core Notes" (`content/*.md`) with tables, code and spec strips. Two **project modules** apply the course to real devices: **H7** to a smart-care-bed monitor (grounded in a purchasable prototype BOM; explicit that hobby parts are *not* a medical device — compliance needs IEC 60601-class isolation), and **H8** to evaluating and hacking a Linux handheld game console (R36S-class).
 
 ### Printable BOM shopping list
