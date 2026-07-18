@@ -861,6 +861,48 @@ function EmuPowerViz() {
   );
 }
 
+/* ============================================================
+   H8 · Interactive 3D model of the handheld (glTF via model-viewer)
+   ============================================================ */
+function ConsoleModelViz() {
+  const lang = (typeof useLang === "function") ? useLang() : "zh";
+  const base = "assets/handheld/";
+  const L = (zh, en) => (lang === "en" ? en : zh);
+  return (
+    <div className="model3d">
+      <model-viewer
+        src={base + "handheld_console.glb"}
+        alt={L("掌上游戏机 3D 模型", "Handheld game console 3D model")}
+        loading="eager"
+        reveal="auto"
+        camera-controls=""
+        auto-rotate=""
+        rotation-per-second="20deg"
+        interaction-prompt="none"
+        touch-action="pan-y"
+        shadow-intensity="1"
+        exposure="1.05"
+        camera-orbit="30deg 72deg 110%"
+        style={{ width: "100%", height: "380px", display: "block" }}
+      >
+        <img slot="poster" src={base + "renders/iso.png"} alt=""
+          style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </model-viewer>
+      <div className="model3d-bar">
+        <span className="m3-hint">◍ {L("拖动旋转 · 滚轮缩放", "Drag to rotate · scroll to zoom")} · 82×130×16 mm</span>
+        <span className="m3-dl">
+          <span className="m3-dl-lbl">{L("下载 CAD", "Download CAD")}</span>
+          <a href={base + "handheld_console.step"} download>STEP</a>
+          <a href={base + "handheld_console.stl"} download>STL</a>
+          <a href={base + "handheld_console.3mf"} download>3MF</a>
+          <a href={base + "handheld_console.glb"} download>GLB</a>
+          <a href={base + "handheld_console.py"} download>PY</a>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- registry & dispatch ---------------- */
 const VIZ = {
   ohm: () => <OhmViz />,
@@ -878,6 +920,7 @@ const VIZ = {
   bcg: () => <BcgViz />,
   pressureMap: () => <PressureMapViz />,
   emuPower: () => <EmuPowerViz />,
+  consoleModel: () => <ConsoleModelViz />,
 };
 
 function Viz({ name }) {

@@ -272,6 +272,13 @@ const ModulePage = ({ moduleId, progress, nav }) => {
             {pick(lang, m.description)}
           </p>
 
+          {m.id === "h8" && (
+            <div className="mod-model-showcase">
+              <div className="mms-head mono">{lang === "en" ? "3D model · RG35XX-style handheld" : "3D 模型 · RG35XX 造型掌机"}</div>
+              <Viz name="consoleModel" />
+            </div>
+          )}
+
           <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: "1px solid var(--ink)" }}>
             {[
               [t("m_meta_chapters"), `${cs.length}`],

@@ -625,7 +625,7 @@ const CHAPTERS = [
 
   /* ============ H8 掌上游戏机(项目) ============ */
   {
-    id: "gc1", code: "GC1", moduleId: "h8", difficulty: 2, hours: 3, prereq: [], viz: "emuPower",
+    id: "gc1", code: "GC1", moduleId: "h8", difficulty: 2, hours: 3, prereq: [], viz: ["consoleModel", "emuPower"],
     parts: ["R36S", "RK3326", "IPS 640×480", "3500mAh"],
     title: { zh: "选硬件:SoC、屏幕、电池、手感", en: "Choosing the Hardware: SoC, Screen, Battery, Feel" },
     summary: {
