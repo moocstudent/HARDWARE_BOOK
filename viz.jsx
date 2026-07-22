@@ -903,8 +903,356 @@ function ConsoleModelViz() {
   );
 }
 
+/* ============================================================
+   H7 · Smart Care Bed — interactive 3D system topology
+   ------------------------------------------------------------
+   A dependency-free canvas 3D projection you can orbit with the
+   mouse. Shows every device, the hardware behind it, the software
+   that runs on it, and the color-coded buses / links that wire
+   them together (devices · hardware · software · network).
+   ============================================================ */
+
+// Bus / link types — the "network connection methods".
+const CB_LINKS = {
+  analog: { zh: "模拟信号", en: "Analog", c: "#b0842e", dash: [] },
+  serial: { zh: "串行数字", en: "Serial digital", c: "#0e8a8a", dash: [] },
+  i2c:    { zh: "I²C 总线", en: "I²C bus", c: "#2f6db0", dash: [] },
+  usb:    { zh: "USB / UART", en: "USB / UART", c: "#7a5cff", dash: [] },
+  dsi:    { zh: "DSI 显示", en: "DSI display", c: "#8a7d6a", dash: [] },
+  wifi:   { zh: "Wi-Fi / 以太网", en: "Wi-Fi / Ethernet", c: "#2d8a4e", dash: [6, 5] },
+  can:    { zh: "CAN 床间总线", en: "CAN inter-bed", c: "#b0308a", dash: [10, 6] },
+  power:  { zh: "隔离供电", en: "Isolated power", c: "#c0392b", dash: [2, 5] },
+};
+
+// Node categories → box color.
+const CB_CAT = {
+  sensor:     "#e8703a",
+  frontend:   "#0e8a8a",
+  mcu:        "#7a5cff",
+  controller: "#2f6db0",
+  ui:         "#c65d21",
+  network:    "#2d8a4e",
+  power:      "#c0392b",
+};
+
+// Devices placed in 3D world space  (x = bed length, y = up, z = width).
+const CB_NODES = [
+  { id: "lc1", p: [-3.6, -0.5, -1.7], cat: "sensor", code: "LC1", zh: "称重传感器", en: "Load cell", leg: true,
+    catZh: "传感器", catEn: "Sensor", link: "analog",
+    hwZh: "50 kg 半桥 ×4(合成全桥),每床脚一个", hwEn: "50 kg half-bridge ×4 (one per bed leg)",
+    swZh: null, swEn: null,
+    netZh: "模拟毫伏差分 → HX711", netEn: "Analog mV differential → HX711",
+    roleZh: "从床脚重量的 <1% 起伏里听呼吸与心跳(BCG)", roleEn: "Hears breathing & heartbeat from <1% weight ripple (BCG)" },
+  { id: "lc2", p: [ 3.6, -0.5, -1.7], cat: "sensor", code: "LC2", alias: "lc1" },
+  { id: "lc3", p: [ 3.6, -0.5,  1.7], cat: "sensor", code: "LC3", alias: "lc1" },
+  { id: "lc4", p: [-3.6, -0.5,  1.7], cat: "sensor", code: "LC4", alias: "lc1" },
+  { id: "hx",  p: [ 4.6, -0.4,  0.9], cat: "frontend", code: "HX711", zh: "24 位 ADC", en: "24-bit ADC",
+    catZh: "模拟前端", catEn: "Analog front-end", link: "serial",
+    hwZh: "HX711(入门)/ ADS1232(低噪 BCG)", hwEn: "HX711 (starter) / ADS1232 (low-noise BCG)",
+    netZh: "两线串行(DOUT/SCK)→ ESP32", netEn: "2-wire serial (DOUT/SCK) → ESP32",
+    roleZh: "把 4 路称重桥放大并数字化", roleEn: "Amplifies & digitizes the four load-cell bridges" },
+  { id: "fsr", p: [ 1.0,  0.12,-0.2], cat: "sensor", code: "FSR", zh: "压力阵列", en: "Pressure array",
+    catZh: "传感器", catEn: "Sensor", link: "analog",
+    hwZh: "FSR 402/406 网格 或 Velostat + 铜箔", hwEn: "FSR 402/406 grid or Velostat + copper foil",
+    netZh: "行/列模拟电压 → 多路复用器", netEn: "Row/col analog voltage → MUX",
+    roleZh: "画出体压分布:体位、翻身、离床", roleEn: "Maps body pressure: posture, turning, bed-exit" },
+  { id: "mux", p: [-4.4, -0.35, 1.3], cat: "frontend", code: "MUX", zh: "16 通道复用", en: "16-ch MUX",
+    catZh: "模拟前端", catEn: "Analog front-end", link: "serial",
+    hwZh: "CD74HC4067 ×N", hwEn: "CD74HC4067 ×N",
+    netZh: "地址线扫描 → ESP32 ADC", netEn: "Address-scanned → ESP32 ADC",
+    roleZh: "逐点扫描 FSR 网格的每个交点", roleEn: "Scans every crossing of the FSR grid" },
+  { id: "imu", p: [-1.1,  0.28, 0.8], cat: "sensor", code: "IMU", zh: "惯性测量", en: "IMU",
+    catZh: "传感器", catEn: "Sensor", link: "i2c",
+    hwZh: "MPU-6050(经济)/ BNO055(自带姿态融合)", hwEn: "MPU-6050 (cheap) / BNO055 (fused)",
+    netZh: "I²C 挂在共享两线总线", netEn: "I²C on the shared two-wire bus",
+    roleZh: "床架倾角与振动 → 辅助判断翻身", roleEn: "Frame tilt & vibration → aids turn detection" },
+  { id: "sht", p: [-2.7,  0.16,-0.7], cat: "sensor", code: "SHT40", zh: "温湿 / 尿湿", en: "Temp / wet",
+    catZh: "传感器", catEn: "Sensor", link: "i2c",
+    hwZh: "SHT31/40 + 叉指电容湿度电极", hwEn: "SHT31/40 + interdigital moisture electrode",
+    netZh: "I²C(与 IMU 共总线)", netEn: "I²C (shares bus with IMU)",
+    roleZh: "确认是真尿湿而非误报", roleEn: "Confirms real bed-wetting, not a false trigger" },
+  { id: "esp", p: [ 2.9,  0.95, 3.2], cat: "mcu", code: "ESP32", zh: "传感器节点 MCU", en: "Sensor node MCU",
+    catZh: "微控制器", catEn: "Microcontroller", link: "usb",
+    hwZh: "ESP32-DevKitC 或 STM32 Nucleo", hwEn: "ESP32-DevKitC or STM32 Nucleo",
+    swZh: ["实时采样 (RTOS)", "滤波 / 打包", "Wi-Fi / BLE"], swEn: ["Real-time sampling", "Filter / packetize", "Wi-Fi / BLE"],
+    netZh: "USB / UART 上行到 Pi;内置 Wi-Fi/BLE", netEn: "USB / UART up to the Pi; on-board Wi-Fi/BLE",
+    roleZh: "硬实时采集所有传感器,先做边缘滤波", roleEn: "Hard-real-time captures every sensor, filters at the edge" },
+  { id: "pi",  p: [ 6.2,  1.9,  1.3], cat: "controller", code: "Pi 5", zh: "主控计算机", en: "Main controller",
+    catZh: "单板计算机", catEn: "Single-board computer", link: null,
+    hwZh: "树莓派 5(4–8 GB)+ microSD", hwEn: "Raspberry Pi 5 (4–8 GB) + microSD",
+    swZh: ["传感器融合", "边缘机器学习", "本地 UI", "网络服务"], swEn: ["Sensor fusion", "Edge ML", "Local UI", "Network service"],
+    netZh: "汇聚节点;上行 Wi-Fi/以太网", netEn: "Aggregator; uplinks over Wi-Fi/Ethernet",
+    roleZh: "融合、判读、报警,并对外通信", roleEn: "Fuses, infers, alerts, and talks to the world" },
+  { id: "scr", p: [ 6.5,  2.8, -1.6], cat: "ui", code: '7" LCD', zh: "床旁触摸屏", en: "Bedside touchscreen",
+    catZh: "人机界面", catEn: "User interface", link: "dsi",
+    hwZh: "7 英寸树莓派触摸屏", hwEn: '7" Raspberry Pi touch display',
+    netZh: "DSI 排线直连 Pi", netEn: "DSI ribbon straight to the Pi",
+    roleZh: "护理人员就地查看波形与状态", roleEn: "Bedside view of waveforms & status" },
+  { id: "net", p: [ 2.6,  4.7, -4.5], cat: "network", code: "NET", zh: "护士站 / 云", en: "Nurse station / cloud",
+    catZh: "上行网络", catEn: "Uplink network", link: "wifi",
+    hwZh: "以太网 / Wi-Fi 主干", hwEn: "Ethernet / Wi-Fi backbone",
+    swZh: ["集中看板", "报警推送", "长期记录"], swEn: ["Central dashboard", "Alert push", "Long-term log"],
+    netZh: "Wi-Fi / 以太网上行", netEn: "Wi-Fi / Ethernet uplink",
+    roleZh: "多床集中监护与留档", roleEn: "Central multi-bed monitoring & records" },
+  { id: "bed2", p: [-5.9,  0.4,  3.7], cat: "controller", code: "Bed #2", zh: "邻床节点", en: "Neighbor bed",
+    catZh: "邻床节点", catEn: "Neighbor node", link: "can", faint: true,
+    hwZh: "同款床节点", hwEn: "Identical bed node",
+    netZh: "CAN 总线串联多床", netEn: "CAN bus chains multiple beds",
+    roleZh: "工业级 CAN 主干把病房里的床连起来", roleEn: "An industrial CAN spine links beds across the ward" },
+  { id: "pwr", p: [-6.1,  1.7, -2.9], cat: "power", code: "PWR", zh: "隔离电源", en: "Isolated power",
+    catZh: "供电 / 安全", catEn: "Power / safety", link: "power",
+    hwZh: "原型 5V/12V;产品级 IEC 60601-1 医疗电源", hwEn: "Prototype 5V/12V; product-grade IEC 60601-1 PSU",
+    netZh: "隔离 DC-DC + 数字隔离器护患安全", netEn: "Isolated DC-DC + digital isolators for patient safety",
+    roleZh: "把市电与患者电气隔离开", roleEn: "Keeps mains electrically isolated from the patient" },
+];
+
+const CB_EDGES = [
+  ["lc1", "hx", "analog"], ["lc2", "hx", "analog"], ["lc3", "hx", "analog"], ["lc4", "hx", "analog"],
+  ["fsr", "mux", "analog"], ["mux", "esp", "serial"], ["hx", "esp", "serial"],
+  ["imu", "esp", "i2c"], ["sht", "esp", "i2c"],
+  ["esp", "pi", "usb"], ["pi", "scr", "dsi"], ["pi", "net", "wifi"], ["pi", "bed2", "can"],
+  ["pwr", "pi", "power"], ["pwr", "esp", "power"],
+];
+
+function CareBedTopologyViz() {
+  const lang = (typeof useLang === "function") ? useLang() : "zh";
+  const L = (zh, en) => (lang === "en" ? en : zh);
+  const canvasRef = React.useRef(null);
+  const cam = React.useRef({ yaw: -0.72, pitch: 0.46 });
+  const drag = React.useRef(null);
+  const [auto, setAuto] = React.useState(true);
+  const [filter, setFilter] = React.useState(null);   // link type to isolate, or null = all
+  const [sel, setSel] = React.useState("pi");          // selected node id
+  const st = React.useRef({ auto, filter, sel, hover: null });
+  React.useEffect(() => { st.current.auto = auto; st.current.filter = filter; st.current.sel = sel; }, [auto, filter, sel]);
+
+  const nodeById = (id) => CB_NODES.find((n) => n.id === id);
+  const info = (n) => (n && n.alias ? nodeById(n.alias) : n);
+
+  // ---- 3D → 2D projection ----
+  const project = (p, W, H) => {
+    const c = cam.current, D = 24, S = Math.min(W, H) / 12.5;
+    const cy = Math.cos(c.yaw), sy = Math.sin(c.yaw);
+    const x1 = p[0] * cy + p[2] * sy;
+    const z1 = -p[0] * sy + p[2] * cy;
+    const cp = Math.cos(c.pitch), sp = Math.sin(c.pitch);
+    const y2 = p[1] * cp - z1 * sp;
+    const z2 = p[1] * sp + z1 * cp;
+    const f = D / (D - z2);
+    return { x: W / 2 + x1 * S * f, y: H * 0.6 - y2 * S * f, depth: z2, f };
+  };
+
+  const drawRef = React.useRef(() => {});
+  React.useEffect(() => {
+    const cv = canvasRef.current;
+    if (!cv) return;
+    const roundRect = (ctx, x, y, w, h, r) => {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    };
+
+    const render = (ts) => {
+      const s = st.current;
+      const C = COLORS();
+      const dpr = window.devicePixelRatio || 1;
+      const W = Math.max(300, cv.clientWidth || 600), H = 440;
+      if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+      const ctx = cv.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      // --- bed slab (surface quad + 4 legs) ---
+      const corners = [[-4, 0, -2], [4, 0, -2], [4, 0, 2], [-4, 0, 2]].map((p) => project(p, W, H));
+      const legs = [[-3.6, -2.2, -1.7], [3.6, -2.2, -1.7], [3.6, -2.2, 1.7], [-3.6, -2.2, 1.7]];
+      const legTops = [[-3.6, 0, -1.7], [3.6, 0, -1.7], [3.6, 0, 1.7], [-3.6, 0, 1.7]];
+      ctx.strokeStyle = C.hair; ctx.lineWidth = 2;
+      legs.forEach((lp, i) => {
+        const a = project(legTops[i], W, H), b = project(lp, W, H);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      });
+      ctx.beginPath(); corners.forEach((c2, i) => i ? ctx.lineTo(c2.x, c2.y) : ctx.moveTo(c2.x, c2.y)); ctx.closePath();
+      ctx.fillStyle = C.surface; ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.4; ctx.stroke();
+
+      // --- FSR pressure grid drawn on the surface ---
+      ctx.strokeStyle = CB_LINKS.analog.c; ctx.globalAlpha = (!s.filter || s.filter === "analog") ? 0.5 : 0.12; ctx.lineWidth = 1;
+      for (let gx = -3; gx <= 3; gx++) {
+        const a = project([gx, 0.02, -1.4], W, H), b = project([gx, 0.02, 1.4], W, H);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      for (let gz = -1; gz <= 1; gz++) {
+        const a = project([-3, 0.02, gz * 1.4], W, H), b = project([3, 0.02, gz * 1.4], W, H);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // --- edges (buses / links) ---
+      CB_EDGES.forEach(([aId, bId, type]) => {
+        const a = project(nodeById(aId).p, W, H), b = project(nodeById(bId).p, W, H);
+        const link = CB_LINKS[type];
+        const active = !s.filter || s.filter === type;
+        const touchesSel = s.sel && (aId === s.sel || bId === s.sel || info(nodeById(aId)).id === s.sel || info(nodeById(bId)).id === s.sel);
+        ctx.strokeStyle = link.c;
+        ctx.globalAlpha = active ? (touchesSel ? 1 : 0.85) : 0.1;
+        ctx.lineWidth = touchesSel && active ? 3 : 1.8;
+        ctx.setLineDash(link.dash.length ? link.dash : []);
+        ctx.lineDashOffset = link.dash.length ? -(ts / 45) % 1000 : 0;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      });
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+
+      // --- nodes, painter-sorted far → near ---
+      const drawn = CB_NODES.map((n) => ({ n, pr: project(n.p, W, H) })).sort((u, v) => u.pr.depth - v.pr.depth);
+      drawn.forEach(({ n, pr }) => {
+        const meta = info(n);
+        const col = CB_CAT[n.cat];
+        const isSel = s.sel === n.id || (n.alias && s.sel === n.alias);
+        const dim = s.filter && meta.link !== s.filter;
+        const isLeg = !!(n.alias || n.leg);
+        const w = (isLeg ? 30 : 62) * Math.max(0.72, Math.min(1.35, pr.f));
+        const h = (isLeg ? 16 : 30) * Math.max(0.72, Math.min(1.35, pr.f));
+        const x = pr.x - w / 2, y = pr.y - h / 2;
+        ctx.globalAlpha = (n.faint ? 0.5 : 1) * (dim ? 0.32 : 1);
+        // connector stub to the surface for floating nodes
+        if (n.p[1] > 0.4) {
+          const foot = project([n.p[0], 0.02, n.p[2]], W, H);
+          ctx.strokeStyle = C.hair; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+          ctx.beginPath(); ctx.moveTo(pr.x, y + h); ctx.lineTo(foot.x, foot.y); ctx.stroke(); ctx.setLineDash([]);
+        }
+        roundRect(ctx, x, y, w, h, 5);
+        ctx.fillStyle = C.bg; ctx.fill();
+        ctx.globalAlpha *= 0.18; ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = (n.faint ? 0.5 : 1) * (dim ? 0.32 : 1);
+        ctx.lineWidth = isSel ? 2.4 : 1.4; ctx.strokeStyle = isSel ? C.accent : col; roundRect(ctx, x, y, w, h, 5); ctx.stroke();
+        ctx.fillStyle = C.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.font = `600 ${isLeg ? 8 : 11}px 'JetBrains Mono', monospace`;
+        ctx.fillText(n.code, pr.x, pr.y);
+        if (!isLeg) {
+          ctx.font = "10px 'Noto Sans SC', sans-serif"; ctx.fillStyle = C.muted;
+          ctx.fillText(L(meta.zh, meta.en), pr.x, y + h + 9);
+        }
+        ctx.globalAlpha = 1;
+      });
+
+      // --- software stack chips: shown for the selected node only (keeps the scene legible) ---
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      const swNode = CB_NODES.find((n) => n.id === s.sel && L(n.swZh, n.swEn));
+      if (swNode && !s.filter) {
+        const sw = L(swNode.swZh, swNode.swEn);
+        const pr = project(swNode.p, W, H);
+        const rightRoom = pr.x < W - 150;
+        ctx.font = "9px 'JetBrains Mono', monospace";
+        sw.forEach((line, i) => {
+          const ty = pr.y - 30 - i * 15, tw = ctx.measureText(line).width + 14;
+          const tx = rightRoom ? pr.x + 30 : pr.x - 30 - tw;
+          ctx.globalAlpha = 0.94; roundRect(ctx, tx, ty - 7, tw, 14, 7);
+          ctx.fillStyle = C.bg; ctx.fill(); ctx.strokeStyle = CB_CAT[swNode.cat]; ctx.lineWidth = 1.2; ctx.stroke();
+          ctx.fillStyle = C.ink; ctx.fillText(line, tx + 7, ty);
+          ctx.strokeStyle = C.hair; ctx.beginPath(); ctx.moveTo(pr.x, pr.y - 14); ctx.lineTo(rightRoom ? tx : tx + tw, ty); ctx.stroke();
+        });
+        ctx.globalAlpha = 1;
+      }
+
+    };
+    drawRef.current = render;
+    render(performance.now());                       // paint once immediately (no rAF dependency)
+    const onResize = () => render(performance.now());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [lang]);
+
+  // Redraw on demand when the selection or link filter changes.
+  React.useEffect(() => { drawRef.current(performance.now()); }, [sel, filter, lang]);
+
+  // Auto-rotate: an animation loop that runs only while spinning.
+  React.useEffect(() => {
+    if (!auto) return;
+    let raf;
+    const tick = (ts) => {
+      if (!drag.current) cam.current.yaw += 0.0035;
+      drawRef.current(ts);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [auto]);
+
+  // ---- pointer: orbit + click-to-select ----
+  const onDown = (e) => {
+    const r = canvasRef.current.getBoundingClientRect();
+    drag.current = { x: e.clientX, y: e.clientY, moved: false,
+      px: e.clientX - r.left, py: e.clientY - r.top, y0: cam.current.yaw, p0: cam.current.pitch };
+  };
+  const onMove = (e) => {
+    if (!drag.current) return;
+    const dx = e.clientX - drag.current.x, dy = e.clientY - drag.current.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) drag.current.moved = true;
+    cam.current.yaw = drag.current.y0 + dx * 0.008;
+    cam.current.pitch = Math.max(-0.15, Math.min(1.15, drag.current.p0 + dy * 0.006));
+    if (!st.current.auto) drawRef.current(performance.now());   // live redraw while paused
+  };
+  const onUp = () => {
+    const d = drag.current; drag.current = null;
+    if (!d || d.moved) return;
+    // hit-test nodes (nearest to camera wins)
+    const cv = canvasRef.current, W = cv.clientWidth, H = 440;
+    let best = null;
+    CB_NODES.forEach((n) => {
+      const leg = !!(n.alias || n.leg);
+      const pr = project(n.p, W, H), w = leg ? 30 : 62, h = leg ? 16 : 30;
+      if (Math.abs(d.px - pr.x) < w / 2 + 4 && Math.abs(d.py - pr.y) < h / 2 + 4) {
+        if (!best || pr.depth > best.depth) best = { id: n.alias || n.id, depth: pr.depth };
+      }
+    });
+    if (best) setSel(best.id);
+  };
+
+  const cur = info(nodeById(sel)) || nodeById("pi");
+
+  return (
+    <div className="cbt">
+      <div className="cbt-bar mono">
+        <span>◍ {L("拖动旋转 · 点设备看详情", "Drag to orbit · click a device")}</span>
+        <span className="cbt-actions">
+          <button className={`cbt-btn ${auto ? "on" : ""}`} onClick={() => setAuto((a) => !a)}>{auto ? L("⏸ 暂停", "⏸ Pause") : L("▶ 自转", "▶ Spin")}</button>
+          <button className="cbt-btn" onClick={() => { cam.current.yaw = -0.72; cam.current.pitch = 0.46; drawRef.current(performance.now()); }}>{L("⟲ 复位", "⟲ Reset")}</button>
+        </span>
+      </div>
+      <canvas ref={canvasRef} className="cbt-canvas"
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}
+        style={{ width: "100%", height: 440, touchAction: "none", cursor: drag.current ? "grabbing" : "grab" }} />
+
+      <div className="cbt-legend">
+        <button className={`cbt-key ${!filter ? "on" : ""}`} onClick={() => setFilter(null)}>
+          <span className="cbt-sw" style={{ background: "var(--ink)" }} />{L("全部", "All")}
+        </button>
+        {Object.entries(CB_LINKS).map(([k, v]) => (
+          <button key={k} className={`cbt-key ${filter === k ? "on" : ""}`} onClick={() => setFilter((f) => (f === k ? null : k))}>
+            <span className="cbt-sw" style={{ background: v.c, borderStyle: v.dash.length ? "dashed" : "solid" }} />{L(v.zh, v.en)}
+          </button>
+        ))}
+      </div>
+
+      <div className="cbt-panel">
+        <div className="cbt-p-head">
+          <span className="cbt-p-code mono" style={{ color: CB_CAT[cur.cat] }}>{cur.code}</span>
+          <span className="cbt-p-name">{L(cur.zh, cur.en)}</span>
+          <span className="cbt-p-cat" style={{ borderColor: CB_CAT[cur.cat], color: CB_CAT[cur.cat] }}>{L(cur.catZh, cur.catEn)}</span>
+        </div>
+        <p className="cbt-p-role">{L(cur.roleZh, cur.roleEn)}</p>
+        <div className="cbt-facets">
+          <div><span className="cbt-f-lbl">{L("硬件", "Hardware")}</span><span>{L(cur.hwZh, cur.hwEn)}</span></div>
+          <div><span className="cbt-f-lbl">{L("软件", "Software")}</span><span>{(L(cur.swZh, cur.swEn) || []).join(" · ") || L("—(纯硬件器件)", "— (hardware only)")}</span></div>
+          <div><span className="cbt-f-lbl">{L("网络", "Network")}</span><span>{cur.link ? <><span className="cbt-dot" style={{ background: CB_LINKS[cur.link].c }} />{L(cur.netZh, cur.netEn)}</> : L(cur.netZh, cur.netEn)}</span></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- registry & dispatch ---------------- */
 const VIZ = {
+  careBedTopology: () => <CareBedTopologyViz />,
   ohm: () => <OhmViz />,
   ledCircuit: () => <LedCircuitViz />,
   divider: () => <DividerViz />,

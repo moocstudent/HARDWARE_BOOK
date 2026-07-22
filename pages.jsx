@@ -279,6 +279,15 @@ const ModulePage = ({ moduleId, progress, nav }) => {
             </div>
           )}
 
+          {m.id === "h7" && (
+            <div className="mod-model-showcase mod-topo-showcase">
+              <div className="mms-head mono">{lang === "en"
+                ? "3D system topology · devices · hardware · software · network"
+                : "3D 系统拓扑 · 设备 · 硬件 · 软件 · 网络连接"}</div>
+              <Viz name="careBedTopology" />
+            </div>
+          )}
+
           <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: "1px solid var(--ink)" }}>
             {[
               [t("m_meta_chapters"), `${cs.length}`],
