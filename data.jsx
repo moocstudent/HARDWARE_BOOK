@@ -1,11 +1,12 @@
 /* =========================================================
-   Curriculum data — 6 modules / 20 chapters
+   Curriculum data — 9 modules / 33 chapters
    ---------------------------------------------------------
    Metadata only (bilingual). The teaching content for each
    chapter (core notes with code, tables, spec strips) lives in
    content/<id>.<lang>.md and is fetched on demand by the
    chapter page. `viz` names an interactive figure from viz.jsx.
-   Part selection follows what the Wokwi simulator covers.
+   Part selection follows what the Wokwi simulator covers;
+   H9 bridges to ERP_BOOK factory-hardware chapters.
    ========================================================= */
 
 const MODULES = [
@@ -79,6 +80,15 @@ const MODULES = [
     description: {
       zh: "换个角度:不再自己造硬件,而是学会「评估并驯服」一台成品设备。以 R36S 这类 Linux 掌上游戏机为例,读懂 SoC、屏幕、电池与手感的选型取舍,再拆解从固件、模拟器前端到 RetroArch 内核的软件栈,学会用 SD 卡布局、Wi-Fi/SSH、手柄映射对接程序,甚至跑自己写的代码。",
       en: "A different angle: instead of building hardware, learn to evaluate and tame a finished device. Using a Linux handheld like the R36S, read the trade-offs in SoC, screen, battery and feel, then dissect the software stack from firmware to the emulator frontend and RetroArch cores — and learn to interface via SD-card layout, Wi-Fi/SSH and controller mapping, even running your own code.",
+    },
+  },
+  {
+    id: "h9", code: "H9", accent: "accent", level: 3, project: true,
+    zh: "ERP 工厂硬件对接(项目)", en: "ERP Floor Hardware Integration (Project)",
+    tagline: { zh: "把扫码枪、安灯与 485 总线,翻译成 ERP 能过账的事件。", en: "Turn scanners, andon and RS-485 into events ERP can post." },
+    description: {
+      zh: "与 ERP_BOOK 的「工厂硬件」模块互为对照:那边讲单据与过账纪律,这边讲电信号怎么接。从现场硬件图谱、扫码枪 UART/USB HID、安灯 GPIO,一路做到边缘网关——RS-485/Modbus 读设备、MQTT/HTTPS 把业务事件交给 MES/ERP。学完你能搭一条「可演示的采集→校验→幂等写入」迷你链路。",
+      en: "The hardware counterpart to ERP_BOOK's factory-hardware module: they cover documents and posting discipline; here you wire the signals. From a floor hardware map, scanner UART/USB HID and andon GPIO, up to an edge gateway — read devices over RS-485/Modbus, hand business events to MES/ERP over MQTT/HTTPS. You'll leave able to demo a mini capture → validate → idempotent-write path.",
     },
   },
 ];
@@ -708,6 +718,92 @@ const CHAPTERS = [
       { zh: "跑自己的代码,把它当计算机用", en: "Running your own code, using it as a computer" },
     ],
   },
+
+  /* ============ H9 ERP 工厂硬件对接(项目) ============ */
+  {
+    id: "eh1", code: "EH1", moduleId: "h9", difficulty: 2, hours: 3, prereq: ["c1", "u2"], viz: "erpFloorMap",
+    parts: ["扫码枪 / Scanner", "安灯 / Andon", "边缘网关 / Edge GW", "电子秤 / Scale"],
+    title: { zh: "现场架构:从面包板到工厂神经末梢", en: "Floor Architecture: From Breadboard to Plant Nerve Endings" },
+    summary: {
+      zh: "ERP 不会自己长眼睛。把课程里的传感、GPIO、总线,映射成产线/仓储真实硬件,并画出「设备 → 边缘 → 消息 → 单据」四层图。",
+      en: "ERP has no eyes of its own. Map course sensors, GPIO and buses onto real line/warehouse hardware, and draw the four layers: device → edge → message → document.",
+    },
+    objectives: [
+      { zh: "按产线/仓储/质检列出第一波必上硬件", en: "List must-have first-wave hardware by line / warehouse / QI" },
+      { zh: "把每类设备映射到至少一种 ERP/MES 事务", en: "Map each device class to at least one ERP/MES transaction" },
+      { zh: "用本课词汇解释传感器→MCU→总线→网关", en: "Explain sensor → MCU → bus → gateway in course vocabulary" },
+      { zh: "对照 ERP_BOOK E11,分清「电信号」与「单据」两侧", en: "Contrast with ERP_BOOK E11: signal side vs document side" },
+    ],
+    outline: [
+      { zh: "为什么键盘录单撑不起工厂 ERP", en: "Why keyboard entry cannot run plant ERP" },
+      { zh: "分区硬件图谱与上线优先级", en: "Zone hardware map and rollout priority" },
+      { zh: "四层对接栈预览(EH4 细讲)", en: "Four-layer stack preview (detail in EH4)" },
+      { zh: "与本课 H1–H6、ERP_BOOK 的知识桥", en: "Bridge to H1–H6 and ERP_BOOK" },
+    ],
+  },
+  {
+    id: "eh2", code: "EH2", moduleId: "h9", difficulty: 2, hours: 4, prereq: ["c1", "eh1"], viz: "scanHid",
+    parts: ["条码枪 / Barcode", "UART", "USB HID", "ESP32"],
+    title: { zh: "扫码枪对接:UART、USB HID 与键盘楔", en: "Scanner Interfacing: UART, USB HID & Keyboard Wedge" },
+    summary: {
+      zh: "扫码头本质是「成像/激光 + 解码芯片 + 串口/USB」。学会三种常见接口,以及如何把一串条码字符变成带幂等键的收货/报工请求。",
+      en: "A scan engine is imaging/laser + decode silicon + serial/USB. Learn the three common interfaces, and how a barcode string becomes a GR/confirmation request with an idempotency key.",
+    },
+    objectives: [
+      { zh: "区分键盘楔、USB HID、TTL UART、RS-232 四种接法", en: "Tell apart keyboard wedge, USB HID, TTL UART and RS-232" },
+      { zh: "用 ESP32 串口读枪并去掉结尾 CR/LF", en: "Read a gun over ESP32 serial and strip trailing CR/LF" },
+      { zh: "设计最小载荷:单号、物料、数量、库位、eventId", en: "Design the minimum payload: doc, material, qty, bin, eventId" },
+      { zh: "理解断网缓存与防重复过账为何是硬件侧也要管的事", en: "See why offline buffer and anti-duplicate matter on the device side too" },
+    ],
+    outline: [
+      { zh: "枪机内部:光电/成像 → 解码 → 接口芯片", en: "Inside the gun: photo/imaging → decode → interface IC" },
+      { zh: "三种接口对照与电平/驱动注意", en: "Three interfaces compared — levels and drivers" },
+      { zh: "最小程序:读串口 → 校验 → 组 JSON", en: "Minimal sketch: serial read → validate → JSON" },
+      { zh: "从扫码到 HTTPS/MQTT 的一跳", en: "One hop from scan to HTTPS/MQTT" },
+    ],
+  },
+  {
+    id: "eh3", code: "EH3", moduleId: "h9", difficulty: 2, hours: 4, prereq: ["d2", "d3", "eh1"], viz: "andonIo",
+    parts: ["按钮 / Button", "LED 灯塔 / Tower", "蜂鸣器 / Buzzer", "GPIO"],
+    title: { zh: "安灯 I/O:拉绳、灯塔与停机状态机", en: "Andon I/O: Cord, Tower Light & Downtime State Machine" },
+    summary: {
+      zh: "安灯不是装饰:按钮/拉绳经消抖进 MCU,灯塔用 GPIO/继电器变色,原因码经网关写入系统——停机开始计入 OEE。本章用本课的数字 I/O 与 PWM 搭出可演示的迷你安灯。",
+      en: "Andon is not décor: a cord/button (debounced) into an MCU, a tower driven by GPIO/relays, reason codes posted via the gateway — downtime hits OEE. Build a demo mini-andon with this course's digital I/O and PWM.",
+    },
+    objectives: [
+      { zh: "用 INPUT_PULLUP + 消抖读安灯拉绳/按钮", en: "Read an andon cord/button with INPUT_PULLUP + debounce" },
+      { zh: "驱动三色灯塔(或三颗 LED)表达呼叫/响应/关闭", en: "Drive a three-color tower (or LEDs) for call / ack / clear" },
+      { zh: "实现呼叫→响应→处置→关闭的状态机", en: "Implement call → acknowledge → fix → clear state machine" },
+      { zh: "说明虚报「绿灯」对库存与交期的伤害", en: "Explain how fake green damages inventory and due dates" },
+    ],
+    outline: [
+      { zh: "硬件:拉绳、灯塔、声光、工位屏", en: "Hardware: cord, tower, alarm, station screen" },
+      { zh: "从 IO2/IO3 到工业灯塔驱动", en: "From IO2/IO3 to driving an industrial tower" },
+      { zh: "状态机与原因码载荷", en: "State machine and reason-code payload" },
+      { zh: "与 ERP_BOOK HW2 对照:电信号如何冻住工单", en: "Contrast ERP_BOOK HW2: how a signal freezes the WO" },
+    ],
+  },
+  {
+    id: "eh4", code: "EH4", moduleId: "h9", difficulty: 3, hours: 5, prereq: ["eh2", "eh3", "c1"], viz: "erpStack",
+    parts: ["RS-485", "Modbus", "MQTT", "边缘网关 / Edge GW"],
+    title: { zh: "边缘网关:485 连设备,MQTT/HTTPS 进 ERP", en: "Edge Gateway: RS-485 to Devices, MQTT/HTTPS into ERP" },
+    summary: {
+      zh: "设备侧常用 RS-485 + Modbus;ERP 听不懂寄存器。边缘网关轮询、映射工单号、校验、断网缓存,再经 MQTT 或 HTTPS 把业务事件交给 MES/ERP——这是整条链路的心脏。",
+      en: "The floor often speaks RS-485 + Modbus; ERP cannot parse registers. The edge gateway polls, maps WO ids, validates, buffers offline, then hands business events to MES/ERP over MQTT or HTTPS — the heart of the whole path.",
+    },
+    objectives: [
+      { zh: "画出现场/边缘/消息/ERP 四层并说出每层协议", en: "Draw field / edge / message / ERP layers and name each protocol" },
+      { zh: "说明为何 485/Modbus 不直连 ERP", en: "Explain why 485/Modbus must not talk to ERP directly" },
+      { zh: "为一个报工事件设计 MQTT topic 与 JSON 载荷", en: "Design an MQTT topic and JSON payload for a confirmation" },
+      { zh: "用 eventId 实现幂等,并演示断网队列", en: "Use eventId for idempotency and demo an offline queue" },
+    ],
+    outline: [
+      { zh: "RS-485 物理层与 Modbus RTU 寄存器", en: "RS-485 physical layer and Modbus RTU registers" },
+      { zh: "网关四件事:轮询、映射、校验、发布", en: "Gateway's four jobs: poll, map, validate, publish" },
+      { zh: "MQTT vs HTTPS:何时用哪条", en: "MQTT vs HTTPS: when to use which" },
+      { zh: "迷你实验:模拟从站 → 网关 → 假 ERP API", en: "Mini lab: fake slave → gateway → mock ERP API" },
+    ],
+  },
 ];
 
 // Structured bill of materials for the H7 Smart Care Bed — rendered on the
@@ -812,6 +908,49 @@ const GAME_CONSOLES = [
   },
 ];
 
+// H9 ERP floor-hardware starter kit — printable on #/bom.
+const ERP_FLOOR_BOM = [
+  {
+    group: { zh: "采集终端", en: "Capture terminals" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "USB / 串口条码枪", en: "USB / serial barcode scanner" }, model: { zh: "带 HID + TTL UART 双模式的入门枪(如某些带底座型号)", en: "Entry gun with HID + TTL UART modes (some cradle models)" }, qty: "1", note: { zh: "EH2 主设备;优先可选串口模式便于 MCU 对接", en: "EH2 primary; prefer a serial mode for MCU wiring" } },
+      { starter: true, tier: "core", name: { zh: "边缘 / 实验 MCU", en: "Edge / lab MCU" }, model: { zh: "ESP32-DevKitC(Wi-Fi + 双串口)", en: "ESP32-DevKitC (Wi-Fi + dual UART)" }, qty: "1–2", note: { zh: "读枪、驱安灯、发 MQTT/HTTPS", en: "Read gun, drive andon, publish MQTT/HTTPS" } },
+      { tier: "optional", name: { zh: "工位平板 / 树莓派", en: "Station tablet / Pi" }, model: { zh: "7\" 安卓平板或树莓派 4/5 + 屏", en: "7\" Android tablet or Pi 4/5 + display" }, qty: "0–1", note: { zh: "本地报工 UI、假 ERP 演示页", en: "Local confirm UI / mock ERP page" } },
+    ],
+  },
+  {
+    group: { zh: "安灯与指示", en: "Andon & signalling" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "三色 LED 或迷你灯塔", en: "RGB LEDs or mini tower" }, model: { zh: "红/黄/绿 LED + 限流电阻,或 24 V 工业灯塔 + 继电器模块", en: "R/Y/G LEDs + resistors, or 24 V industrial tower + relay module" }, qty: "1 套", note: { zh: "EH3;入门用 LED,产线级用灯塔", en: "EH3; LEDs to start, tower for plant-grade" } },
+      { starter: true, tier: "core", name: { zh: "拉绳 / 常开按钮", en: "Cord / NO pushbutton" }, model: { zh: "工业急停风格按钮或普通轻触按钮", en: "Industrial-style pushbutton or tactile switch" }, qty: "1–2", note: { zh: "INPUT_PULLUP + 消抖(见 IO2)", en: "INPUT_PULLUP + debounce (see IO2)" } },
+      { tier: "optional", name: { zh: "有源蜂鸣器", en: "Active buzzer" }, model: { zh: "5 V / 3.3 V 有源蜂鸣器", en: "5 V / 3.3 V active buzzer" }, qty: "1", note: { zh: "呼叫态声光报警", en: "Audible alarm in call state" } },
+    ],
+  },
+  {
+    group: { zh: "现场总线与网关", en: "Fieldbus & gateway" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "RS-485 收发器模块", en: "RS-485 transceiver module" }, model: { zh: "MAX485 / SP3485 转接板 ×2(主从各一)", en: "MAX485 / SP3485 breakout ×2 (master + slave)" }, qty: "2", note: { zh: "EH4;用第二块 ESP32 模拟从站", en: "EH4; second ESP32 as fake slave" } },
+      { tier: "optional", name: { zh: "USB–RS-485 适配器", en: "USB–RS-485 adapter" }, model: { zh: "CH340/FTDI 带 485 芯片的转换器", en: "CH340/FTDI converter with 485 silicon" }, qty: "0–1", note: { zh: "用 PC 当 Modbus 主站调试", en: "Debug as Modbus master from a PC" } },
+      { tier: "core", name: { zh: "MQTT Broker(软件)", en: "MQTT broker (software)" }, model: { zh: "Mosquitto / EMQX 本地或 Docker", en: "Local Mosquitto / EMQX or Docker" }, qty: "1", note: { zh: "消息层实验;也可用公共测试 broker", en: "Message-layer lab; public test broker OK" } },
+    ],
+  },
+  {
+    group: { zh: "可选:秤与标签", en: "Optional: scale & label" },
+    items: [
+      { tier: "optional", name: { zh: "串口电子秤 / HX711 秤", en: "Serial scale / HX711 scale" }, model: { zh: "带 RS-232/TTL 的检重秤,或 HX711 + 称重传感器", en: "Checkweigher with RS-232/TTL, or HX711 + load cell" }, qty: "0–1", note: { zh: "质检称重回传;原理见 CB2", en: "QI weight return; principle in CB2" } },
+      { tier: "optional", name: { zh: "热敏标签打印机", en: "Thermal label printer" }, model: { zh: "支持 ESC/POS 或 TSPL 的 USB/网口机", en: "USB/Ethernet unit supporting ESC/POS or TSPL" }, qty: "0–1", note: { zh: "打物料/批次条码闭环", en: "Close the material/batch barcode loop" } },
+    ],
+  },
+  {
+    group: { zh: "辅料与工具", en: "Consumables & tools" },
+    items: [
+      { starter: true, tier: "core", name: { zh: "杜邦线、面包板、电阻", en: "Jumpers, breadboard, resistors" }, model: { zh: "—", en: "—" }, qty: "1 套", note: { zh: "搭建迷你安灯与 485", en: "Wire mini-andon and 485" } },
+      { tier: "core", name: { zh: "逻辑分析仪(可选)", en: "Logic analyzer (optional)" }, model: { zh: "Saleae 兼容 8 通道", en: "Saleae-compatible 8-ch" }, qty: "0–1", note: { zh: "看 UART/485 时序", en: "Inspect UART/485 timing" } },
+      { starter: true, tier: "core", name: { zh: "打印的测试条码", en: "Printed test barcodes" }, model: { zh: "Code128 / QR: PO、物料、库位样张", en: "Code128 / QR samples: PO, material, bin" }, qty: "1 套", note: { zh: "扫码演练用", en: "For scan drills" } },
+    ],
+  },
+];
+
 // Aggregates used on the home hero.
 const TOTAL_HOURS = CHAPTERS.reduce((s, c) => s + c.hours, 0);
 const ALL_PARTS = Array.from(new Set(CHAPTERS.flatMap((c) => c.parts || [])));
@@ -822,3 +961,4 @@ window.TOTAL_HOURS = TOTAL_HOURS;
 window.ALL_PARTS = ALL_PARTS;
 window.CARE_BED_BOM = CARE_BED_BOM;
 window.GAME_CONSOLES = GAME_CONSOLES;
+window.ERP_FLOOR_BOM = ERP_FLOOR_BOM;

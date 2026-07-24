@@ -1,10 +1,10 @@
 # 硬件自学 · self-taught hardware
 
-A bilingual (中文 / English) self-study site for **electronics and embedded hardware** — from Ohm's law to microcontrollers, sensors, actuators and communication buses. Every chapter ships an **interactive circuit / waveform figure** so you grasp the *why* before writing code.
+A bilingual (中文 / English) self-study site for **electronics and embedded hardware** — from Ohm's law to microcontrollers, sensors, actuators, communication buses, and **ERP floor-hardware integration**. Every chapter ships an **interactive circuit / waveform / topology figure** so you grasp the *why* before writing code.
 
-Built in the editorial style of the sibling **MATH_BOOK** project (beige paper, big serif display, orange-red accent, teal primary, running labels and ticker). Topic and part selection follow what the [Wokwi](https://wokwi.com) online simulator covers, so each chapter is "read it, then simulate it".
+Built in the editorial style of the sibling **MATH_BOOK** project (beige paper, big serif display, orange-red accent, teal primary, running labels and ticker). Topic and part selection follow what the [Wokwi](https://wokwi.com) online simulator covers, so each chapter is "read it, then simulate it". Factory-integration chapters cross-reference the sibling **ERP_BOOK** (documents & posting discipline on that side; signals & wiring on this side).
 
-## Curriculum — 8 modules, 29 chapters
+## Curriculum — 9 modules, 33 chapters
 
 | # | Module | Chapters |
 |---|---|---|
@@ -16,18 +16,19 @@ Built in the editorial style of the sibling **MATH_BOOK** project (beige paper, 
 | H6 | 通信总线 · Communication Buses | UART · I²C · SPI |
 | H7 | 智能护理床 · Smart Care Bed (project) | system & BOM · breathing/heart-rate (load cells + BCG) · turning/posture (pressure array + IMU) · bed-wetting & moisture · power/isolation & patient safety |
 | H8 | 掌上游戏机 · Handheld Game Console (project) | choosing hardware (SoC/screen/battery) · OS & firmware (Linux, boot-from-SD) · emulation stack (EmulationStation + RetroArch/libretro) · interfacing (SD layout, SSH, gamepad, your own code) |
+| H9 | ERP 工厂硬件对接 · ERP Floor Hardware (project) | floor architecture map · scanner UART/USB HID · andon GPIO state machine · edge gateway (RS-485/Modbus → MQTT/HTTPS → ERP) |
 
 The H8 module features an **interactive 3D model** of a parametric RG35XX-style handheld (82×130×16 mm) rendered with Google `model-viewer` (orbit/zoom, iso-render poster fallback), plus downloadable CAD in STEP/STL/3MF/GLB/build123d-`.py`. Assets live in `assets/handheld/`.
 
-All 29 chapters have full bilingual "Core Notes" (`content/*.md`) with tables, code and spec strips. Two **project modules** apply the course to real devices: **H7** to a smart-care-bed monitor (grounded in a purchasable prototype BOM; explicit that hobby parts are *not* a medical device — compliance needs IEC 60601-class isolation), and **H8** to evaluating and hacking a Linux handheld game console (R36S-class).
+All chapters have full bilingual "Core Notes" (`content/*.md`) with tables, code and spec strips. Three **project modules** apply the course: **H7** smart care bed, **H8** Linux handheld, **H9** ERP floor capture (bridge to ERP_BOOK E11).
 
 ### Printable BOM shopping list
 
-`#/bom` renders the H7 care-bed bill of materials as a **print-ready shopping list** (checkboxes, per-subsystem groups, starter/optional/product-grade tags, a "starter kit only" filter, and a Print / Save-as-PDF button). A dedicated `@media print` stylesheet strips the site chrome and prints ink-on-white.
+`#/bom` renders printable shopping lists for **H7** (care bed), **H8** (console catalog), and **H9** (ERP floor starter kit: scanner, andon, MAX485, ESP32 gateway). A dedicated `@media print` stylesheet strips the site chrome and prints ink-on-white.
 
 ## Interactive figures (`viz.jsx`)
 
-Dependency-free canvas 2D, theme-aware, driven by sliders: Ohm's law water-pipe, LED + resistor (with over-current warning), voltage divider, RC charging curve, digital waveform, pull-up/pull-down, PWM duty cycle, ADC quantization staircase, servo pulse-width→angle, ultrasonic time-of-flight, UART frame, I²C transaction, BCG (heartbeat + breathing in a load-cell signal), a live posture/bed-exit pressure map, and an emulation-power chart (SoC tier → which console generation is playable).
+Dependency-free canvas 2D, theme-aware, driven by sliders: Ohm's law water-pipe, LED + resistor (with over-current warning), voltage divider, RC charging curve, digital waveform, pull-up/pull-down, PWM duty cycle, ADC quantization staircase, servo pulse-width→angle, ultrasonic time-of-flight, UART frame, I²C transaction, BCG (heartbeat + breathing in a load-cell signal), a live posture/bed-exit pressure map, an emulation-power chart (SoC tier → which console generation is playable), plus H9 floor-zone map, scan→HID/UART flow, andon state machine, and the four-layer ERP protocol stack.
 
 ## Stack
 

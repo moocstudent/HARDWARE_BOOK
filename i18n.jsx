@@ -71,8 +71,8 @@ const UI = {
   hero_l2a:    { zh: "到掌握", en: "to mastering" },
   hero_l2b:    { zh: "硬件原理。", en: "hardware." },
   hero_sub:    {
-    zh: "一站式电子与嵌入式硬件自学地图:欧姆定律、分压、RC 滤波,数字与模拟 I/O、PWM 与 ADC,再到微控制器、传感器、执行器与 UART/I²C/SPI 通信。每一章都配可交互的电路波形图,让你先看懂「为什么」,再动手写代码。共 {M} 个模块、{C} 章。",
-    en: "A single self-study map for electronics and embedded hardware: Ohm's law, dividers and RC filtering; digital & analog I/O, PWM and ADC; then microcontrollers, sensors, actuators and UART/I²C/SPI buses. Every chapter ships an interactive circuit or waveform so you grasp the \"why\" before you write a line of code. {M} modules, {C} chapters.",
+    zh: "一站式电子与嵌入式硬件自学地图:欧姆定律、分压、RC 滤波,数字与模拟 I/O、PWM 与 ADC,再到微控制器、传感器、执行器与 UART/I²C/SPI 通信,以及 ERP 工厂现场的扫码/安灯/边缘网关对接。每一章都配可交互图,让你先看懂「为什么」,再动手写代码。共 {M} 个模块、{C} 章。",
+    en: "A single self-study map for electronics and embedded hardware: Ohm's law, dividers and RC filtering; digital & analog I/O, PWM and ADC; then microcontrollers, sensors, actuators and UART/I²C/SPI buses — plus ERP floor capture (scanners, andon, edge gateways). Every chapter ships an interactive figure so you grasp the \"why\" before you write a line of code. {M} modules, {C} chapters.",
   },
   cta_start:   { zh: "从第一章开始 →", en: "Start chapter 1 →" },
   cta_howto:   { zh: "如何使用", en: "How it works" },
@@ -89,7 +89,7 @@ const UI = {
   /* sections */
   sec01:       { zh: "学习路线图", en: "Learning roadmap" },
   sec01_aside: { zh: "从基础电学一路到通信总线", en: "From basic circuits to communication buses" },
-  sec02:       { zh: "八大模块", en: "Eight modules" },
+  sec02:       { zh: "九大模块", en: "Nine modules" },
   sec02_aside: { zh: "点击进入任意模块", en: "Click any module to enter" },
   sec03:       { zh: "学习方法", en: "The method" },
   sec03_aside: { zh: "先原理,再仿真,后硬件", en: "Principle, then simulation, then silicon" },
@@ -167,10 +167,10 @@ const UI = {
   about_sub:    { zh: "把硬件原理讲清楚,而不只是照抄接线。", en: "Teach the principle, not just the wiring." },
   about_h1: { zh: "这是什么", en: "What this is" },
   about_p1: {
-    zh: "一个面向自学者的电子与嵌入式硬件教程,共 {M} 个模块、{C} 章。从最基础的电压/电流/电阻,到微控制器、传感器与通信总线,循序渐进。",
-    en: "A self-study course in electronics and embedded hardware — {M} modules and {C} chapters. It builds from the very basics of voltage, current and resistance up to microcontrollers, sensors and communication buses.",
+    zh: "一个面向自学者的电子与嵌入式硬件教程,共 {M} 个模块、{C} 章。从最基础的电压/电流/电阻,到微控制器、传感器、通信总线,再到智能护理床、掌机与 ERP 工厂硬件对接等实战项目。",
+    en: "A self-study course in electronics and embedded hardware — {M} modules and {C} chapters. It builds from the very basics of voltage, current and resistance up to microcontrollers, sensors, communication buses, and hands-on projects including a smart care bed, a handheld console, and ERP floor-hardware integration.",
   },
-  about_p1b: { zh: "全部内容中英双语,支持浅色/深色主题,进度保存在你自己的浏览器里,无需注册。", en: "Everything is bilingual (Chinese/English), supports light and dark themes, and keeps your progress in your own browser — no signup." },
+  about_p1b: { zh: "全部内容中英双语,支持浅色/深色主题,进度保存在你自己的浏览器里,无需注册。工厂对接章可与 ERP_BOOK 对照阅读。", en: "Everything is bilingual (Chinese/English), supports light and dark themes, and keeps your progress in your own browser — no signup. Floor-integration chapters cross-reference ERP_BOOK." },
   about_h2: { zh: "为什么配可交互图", en: "Why interactive figures" },
   about_p2: {
     zh: "硬件的难点常在「看不见」:电流多大、电容充到几伏、PWM 占空比如何决定亮度。每章的交互图把这些不可见的量画出来,拖动滑块即可建立直觉。",
@@ -183,25 +183,27 @@ const UI = {
   },
   about_h4: { zh: "如何使用", en: "How to use it" },
   about_p4: {
-    zh: "按路线图从上到下学:先打好模块一、二的电学与 I/O 基础,再进入微控制器与外设。读完一章就点「标记为已完成」,进度会保存在本地。",
-    en: "Follow the roadmap top to bottom: lay the circuit and I/O foundations in modules one and two, then move on to microcontrollers and peripherals. Mark a chapter complete when you finish — progress is stored locally.",
+    zh: "按路线图从上到下学:先打好模块一、二的电学与 I/O 基础,再进入微控制器与外设,最后做实战项目(护理床 / 掌机 / ERP 工厂对接)。读完一章就点「标记为已完成」,进度会保存在本地。",
+    en: "Follow the roadmap top to bottom: lay the circuit and I/O foundations in modules one and two, then move on to microcontrollers and peripherals, and finish with the projects (care bed / handheld / ERP floor). Mark a chapter complete when you finish — progress is stored locally.",
   },
 
   /* projects landing page */
   proj_kicker:  { zh: "实战项目", en: "Hands-on Projects" },
   proj_title:   { zh: "把原理,做成东西。", en: "Turn principle into things." },
-  proj_sub:     { zh: "两个把整门课串起来的实战项目:从传感到系统,从选型到编程。前面每一章学的电学、I/O、传感器与总线,在这里合成一件真正能用的作品。", en: "Two hands-on projects that tie the whole course together — from sensing to systems, from spec-picking to programming. Every circuit, I/O trick, sensor and bus from the earlier chapters comes together here into something that actually works." },
+  proj_sub:     { zh: "三个把整门课串起来的实战项目:智能护理床、掌上游戏机、ERP 工厂硬件对接。前面每一章学的电学、I/O、传感器与总线,在这里合成真正能用的系统——第三项与 ERP_BOOK 对照,把电信号翻译成可过账事件。", en: "Three hands-on projects that tie the whole course together: a smart care bed, a handheld console, and ERP floor-hardware integration. Every circuit, I/O trick, sensor and bus from earlier chapters lands here — the third bridges ERP_BOOK, turning signals into postable events." },
   proj_enter:   { zh: "进入模块 →", en: "Enter module →" },
   proj_bom_link:{ zh: "🖨 采购清单", en: "🖨 Shopping list" },
   proj_chapters:{ zh: "章", en: "chapters" },
-  proj_note:    { zh: "两个项目都基于可现货采购的器件,面向学习与原型。医疗床项目非医疗器械;游戏机项目不提供任何 ROM/BIOS。", en: "Both projects use off-the-shelf, purchasable parts, for learning and prototyping. The care-bed project is not a medical device; the console project ships no ROMs/BIOS." },
+  proj_note:    { zh: "项目均基于可现货采购的器件,面向学习与原型。医疗床项目非医疗器械;游戏机项目不提供任何 ROM/BIOS;ERP 对接章演示采集链路,不替代真实 ERP 实施。", en: "Projects use off-the-shelf parts for learning and prototyping. The care-bed project is not a medical device; the console project ships no ROMs/BIOS; the ERP chapters demo a capture path and do not replace a real ERP implementation." },
 
-  /* printable inventory page (care-bed BOM + game consoles) */
+  /* printable inventory page (care-bed BOM + game consoles + ERP floor) */
   bom_kicker:   { zh: "硬件清单 · 采购单", en: "Hardware Inventory · Shopping List" },
   bom_title:    { zh: "物料与设备清单", en: "Parts & Devices Inventory" },
-  bom_sub:      { zh: "两部分:① 智能护理床的原型级物料(BOM);② 掌上游戏机选型清单。前者均为现货,可从 Digi-Key、Mouser、亚马逊、Adafruit、SparkFun 采购。", en: "Two parts: ① a prototype-grade BOM for the smart care bed; ② a handheld game-console list. The former is all off-the-shelf from Digi-Key, Mouser, Amazon, Adafruit, SparkFun." },
+  bom_sub:      { zh: "三部分:① 智能护理床原型 BOM;② 掌上游戏机选型;③ ERP 工厂采集入门套件(扫码枪、安灯、485、网关)。前两项与第三项入门件均可现货采购。", en: "Three parts: ① care-bed prototype BOM; ② handheld console list; ③ ERP floor starter kit (scanner, andon, 485, gateway). Starter parts are off-the-shelf." },
   inv_bed_head:     { zh: "① 智能护理床 · 物料清单", en: "① Smart Care Bed · BOM" },
   inv_console_head: { zh: "② 掌上游戏机 · 选型清单", en: "② Handheld Game Consoles · List" },
+  inv_erp_head:     { zh: "③ ERP 工厂硬件 · 入门套件", en: "③ ERP Floor Hardware · Starter Kit" },
+  inv_erp_sub:      { zh: "配合 H9 模块:扫码 UART/HID、安灯 GPIO、MAX485 双机实验与 MQTT/HTTPS 发布。标记「入门套件」即可搭出可演示的采集→校验→写入链路。", en: "For the H9 module: scanner UART/HID, andon GPIO, dual-board MAX485 lab and MQTT/HTTPS publish. The starter-tagged rows are enough to demo capture → validate → write." },
   inv_console_sub:  { zh: "按 SoC 档次排列的常见 Linux 掌机(参见 H8 模块 GC1)。规格为大致参考,以官方为准。R36S 为本课程参考机型。", en: "Common Linux handhelds by SoC tier (see the H8 module, GC1). Specs are indicative — check official sources. The R36S is this course's reference device." },
   inv_c_console: { zh: "机型", en: "Console" },
   inv_c_soc:     { zh: "SoC", en: "SoC" },
@@ -214,7 +216,7 @@ const UI = {
   inv_tier_high:  { zh: "高端", en: "High" },
   inv_featured:   { zh: "参考机型", en: "reference" },
   bom_print:    { zh: "🖨 打印 / 存为 PDF", en: "🖨 Print / Save as PDF" },
-  bom_disclaimer: { zh: "⚠ 本清单为原型级器件,非医疗器械。走向受监管产品需替换为医疗级隔离器件并通过 IEC 60601 认证(见 CB5)。", en: "⚠ This list is prototype-grade and not a medical device. A regulated product needs medical-grade isolated parts and IEC 60601 certification (see CB5)." },
+  bom_disclaimer: { zh: "⚠ 护理床清单为原型级器件,非医疗器械。ERP 套件用于学习演示,不构成生产环境认证或安全评估。", en: "⚠ The care-bed list is prototype-grade, not a medical device. The ERP kit is for learning demos — not a production certification or safety assessment." },
   bom_col_item:  { zh: "元件", en: "Item" },
   bom_col_model: { zh: "示例型号", en: "Example model" },
   bom_col_qty:   { zh: "数量", en: "Qty" },
@@ -225,7 +227,7 @@ const UI = {
   bom_tier_optional: { zh: "可选", en: "optional" },
   bom_tier_product:  { zh: "产品级", en: "product-grade" },
   bom_starter_note: { zh: "「入门套件」是成本最低的可运行原型;带标记的行即属于它。", en: "The starter kit is the cheapest runnable prototype; tagged rows belong to it." },
-  bom_footer:   { zh: "硬件自学 · 智能护理床采购清单 · 原型级 · 非医疗器械", en: "self-taught hardware · Smart Care Bed shopping list · prototype-grade · not a medical device" },
+  bom_footer:   { zh: "硬件自学 · 采购清单 · 原型 / 学习用", en: "self-taught hardware · shopping list · prototype / learning use" },
 };
 
 window.LangContext = LangContext;

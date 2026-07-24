@@ -557,7 +557,7 @@ const ProjectsPage = ({ nav }) => {
                 <div className="proj-foot">
                   <span className="mono">{cs.length} {t("proj_chapters")} · {hours} {t("hours_unit")}</span>
                   <span className="proj-actions">
-                    {m.id === "h7" && (
+                    {(m.id === "h7" || m.id === "h9") && (
                       <button className="btn" style={{ padding: "6px 12px", fontSize: 12 }}
                         onClick={(e) => { e.stopPropagation(); nav("#/bom"); }}>
                         {t("proj_bom_link")}
@@ -591,12 +591,51 @@ const BomPage = ({ nav }) => {
   const t = useT();
   const lang = useLang();
   const [starterOnly, setStarterOnly] = React.useState(false);
-  const groups = CARE_BED_BOM.map((g) => ({
+  const filterGroups = (src) => (src || []).map((g) => ({
     ...g,
     items: starterOnly ? g.items.filter((it) => it.starter) : g.items,
   })).filter((g) => g.items.length);
+  const groups = filterGroups(CARE_BED_BOM);
+  const erpGroups = filterGroups(typeof ERP_FLOOR_BOM !== "undefined" ? ERP_FLOOR_BOM : []);
   const totalRows = CARE_BED_BOM.reduce((s, g) => s + g.items.length, 0);
   const starterRows = CARE_BED_BOM.reduce((s, g) => s + g.items.filter((i) => i.starter).length, 0);
+  const erpTotal = (typeof ERP_FLOOR_BOM !== "undefined" ? ERP_FLOOR_BOM : []).reduce((s, g) => s + g.items.length, 0);
+  const erpStarter = (typeof ERP_FLOOR_BOM !== "undefined" ? ERP_FLOOR_BOM : []).reduce((s, g) => s + g.items.filter((i) => i.starter).length, 0);
+
+  const renderBomGroups = (gs) => gs.map((g, gi) => (
+    <section className="bom-group" key={gi}>
+      <h2 className="bom-group-title">
+        <span className="mono idx">{String(gi + 1).padStart(2, "0")}</span>
+        <span>{pick(lang, g.group)}</span>
+      </h2>
+      <table className="bom-table">
+        <thead>
+          <tr>
+            <th className="c-item">{t("bom_col_item")}</th>
+            <th className="c-model">{t("bom_col_model")}</th>
+            <th className="c-qty">{t("bom_col_qty")}</th>
+            <th className="c-note">{t("bom_col_note")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {g.items.map((it, ii) => (
+            <tr key={ii} className={it.starter ? "is-starter" : ""}>
+              <td className="c-item">
+                <span className="bom-box" aria-hidden="true">☐</span>
+                {pick(lang, it.name)}
+                {it.starter && <span className="bom-tag starter">{t("bom_starter_tag")}</span>}
+                {it.tier === "optional" && <span className="bom-tag opt">{t("bom_tier_optional")}</span>}
+                {it.tier === "product" && <span className="bom-tag prod">{t("bom_tier_product")}</span>}
+              </td>
+              <td className="c-model mono">{pick(lang, it.model)}</td>
+              <td className="c-qty">{it.qty}</td>
+              <td className="c-note">{pick(lang, it.note)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ));
 
   return (
     <div className="page bom-page">
@@ -604,7 +643,7 @@ const BomPage = ({ nav }) => {
         <div className="breadcrumb no-print">
           <a onClick={() => nav("#/")}>{t("bc_home")}</a>
           <span className="sep">/</span>
-          <a onClick={() => nav("#/m/h7")}>H7</a>
+          <a onClick={() => nav("#/projects")}>{t("nav_projects")}</a>
           <span className="sep">/</span>
           <span style={{ color: "var(--ink)" }}>{t("nav_bom")}</span>
         </div>
@@ -619,49 +658,14 @@ const BomPage = ({ nav }) => {
               {starterOnly ? t("bom_show_all") : t("bom_starter_only")}
             </button>
             <span className="bom-count mono">
-              {starterOnly ? starterRows : totalRows} / {totalRows}
+              {starterOnly ? (starterRows + erpStarter) : (totalRows + erpTotal)} / {totalRows + erpTotal}
             </span>
           </div>
           <div className="bom-disclaimer">{t("bom_disclaimer")}</div>
         </section>
 
         <h2 className="inv-section-head"><span>{t("inv_bed_head")}</span></h2>
-
-        {groups.map((g, gi) => (
-          <section className="bom-group" key={gi}>
-            <h2 className="bom-group-title">
-              <span className="mono idx">{String(gi + 1).padStart(2, "0")}</span>
-              <span>{pick(lang, g.group)}</span>
-            </h2>
-            <table className="bom-table">
-              <thead>
-                <tr>
-                  <th className="c-item">{t("bom_col_item")}</th>
-                  <th className="c-model">{t("bom_col_model")}</th>
-                  <th className="c-qty">{t("bom_col_qty")}</th>
-                  <th className="c-note">{t("bom_col_note")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {g.items.map((it, ii) => (
-                  <tr key={ii} className={it.starter ? "is-starter" : ""}>
-                    <td className="c-item">
-                      <span className="bom-box" aria-hidden="true">☐</span>
-                      {pick(lang, it.name)}
-                      {it.starter && <span className="bom-tag starter">{t("bom_starter_tag")}</span>}
-                      {it.tier === "optional" && <span className="bom-tag opt">{t("bom_tier_optional")}</span>}
-                      {it.tier === "product" && <span className="bom-tag prod">{t("bom_tier_product")}</span>}
-                    </td>
-                    <td className="c-model mono">{pick(lang, it.model)}</td>
-                    <td className="c-qty">{it.qty}</td>
-                    <td className="c-note">{pick(lang, it.note)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        ))}
-
+        {renderBomGroups(groups)}
         <p className="bom-note small">{t("bom_starter_note")}</p>
 
         <h2 className="inv-section-head"><span>{t("inv_console_head")}</span></h2>
@@ -701,6 +705,17 @@ const BomPage = ({ nav }) => {
           <a style={{ color: "var(--accent)", borderBottom: "1px solid var(--hairline-strong)", cursor: "pointer" }} onClick={() => nav("#/m/h8")}>
             {lang === "en" ? "H8 Handheld Game Console module" : "H8 掌上游戏机模块"}
           </a>{lang === "en" ? "." : "。"}
+        </p>
+
+        <h2 className="inv-section-head"><span>{t("inv_erp_head")}</span></h2>
+        <p className="bom-sub" style={{ marginTop: 0 }}>{t("inv_erp_sub")}</p>
+        {renderBomGroups(erpGroups)}
+        <p className="bom-note small">
+          {lang === "en" ? "Walk the wiring in " : "接线与协议见 "}
+          <a style={{ color: "var(--accent)", borderBottom: "1px solid var(--hairline-strong)", cursor: "pointer" }} onClick={() => nav("#/m/h9")}>
+            {lang === "en" ? "H9 ERP Floor Hardware" : "H9 ERP 工厂硬件对接"}
+          </a>
+          {lang === "en" ? "; pair with ERP_BOOK E11 for posting discipline." : "; 过账纪律对照 ERP_BOOK E11。"}
         </p>
 
         <footer className="footer bom-footer">

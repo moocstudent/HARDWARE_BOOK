@@ -1250,6 +1250,297 @@ function CareBedTopologyViz() {
   );
 }
 
+/* ============================================================
+   H9 · ERP floor hardware map (zone → device → document)
+   ============================================================ */
+function ErpFloorMapViz() {
+  const lang = (typeof useLang === "function") ? useLang() : "zh";
+  const L = (zh, en) => (lang === "en" ? en : zh);
+  const zones = [
+    { id: "line", zh: "产线", en: "Line", c: "#0e3a3a",
+      items: [
+        { zh: "安灯灯塔", en: "Andon tower", doc: { zh: "停机码 / OEE", en: "Downtime / OEE" } },
+        { zh: "工位平板", en: "Station tablet", doc: { zh: "报工确认", en: "Confirm WO" } },
+        { zh: "PLC 脉冲", en: "PLC pulse", doc: { zh: "自动计件", en: "Piece count" } },
+      ] },
+    { id: "wh", zh: "仓储", en: "Warehouse", c: "#ff4d1f",
+      items: [
+        { zh: "手持扫码", en: "Handheld scan", doc: { zh: "收发货", en: "GR / GI" } },
+        { zh: "标签机", en: "Labeler", doc: { zh: "批次条码", en: "Batch label" } },
+        { zh: "RFID 门", en: "RFID gate", doc: { zh: "整托过账", en: "Pallet post" } },
+      ] },
+    { id: "qi", zh: "质检", en: "QI", c: "#5a6b2a",
+      items: [
+        { zh: "检重秤", en: "Checkweigher", doc: { zh: "合格判定", en: "Pass / fail" } },
+        { zh: "温湿度", en: "TH probe", doc: { zh: "环境超限", en: "Env alarm" } },
+      ] },
+    { id: "edge", zh: "边缘", en: "Edge", c: "#6b4c2a",
+      items: [
+        { zh: "网关", en: "Gateway", doc: { zh: "协议翻译", en: "Translate" } },
+        { zh: "MQTT/HTTPS", en: "MQTT/HTTPS", doc: { zh: "进 ERP", en: "Into ERP" } },
+      ] },
+  ];
+  const [sel, setSel] = React.useState("wh");
+  const z = zones.find((x) => x.id === sel) || zones[0];
+  return (
+    <div>
+      <div className="viz-ctrl" style={{ flexWrap: "wrap", gap: 8 }}>
+        {zones.map((zn) => (
+          <button key={zn.id} className={`btn ${sel === zn.id ? "btn-accent" : ""}`}
+            style={{ padding: "6px 12px", fontSize: 12 }}
+            onClick={() => setSel(zn.id)}>{L(zn.zh, zn.en)}</button>
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginTop: 12 }}>
+        {z.items.map((it, i) => (
+          <div key={i} style={{
+            border: "1.5px solid var(--ink)", padding: "12px 14px", background: "var(--surface)",
+            borderLeft: `4px solid ${z.c}`,
+          }}>
+            <div className="mono" style={{ fontSize: 11, letterSpacing: "0.12em", color: "var(--muted)" }}>{String(i + 1).padStart(2, "0")}</div>
+            <div style={{ fontFamily: "Noto Serif SC, serif", fontSize: 18, margin: "4px 0 8px" }}>{L(it.zh, it.en)}</div>
+            <div style={{ fontSize: 13, color: "var(--muted)" }}>→ {L(it.doc.zh, it.doc.en)}</div>
+          </div>
+        ))}
+      </div>
+      <div className="viz-readout" style={{ marginTop: 12 }}>
+        {L("点分区看「设备 → 写入单据」。第一波通常是:扫码枪 + 工位屏 + 安灯 + 边缘缓存。",
+           "Click a zone for device → document. First wave is usually: scanner + station screen + andon + edge buffer.")}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   H9 · Scanner → HID/UART → payload
+   ============================================================ */
+function ScanHidViz() {
+  const lang = (typeof useLang === "function") ? useLang() : "zh";
+  const L = (zh, en) => (lang === "en" ? en : zh);
+  const modes = [
+    { id: "hid", zh: "USB HID 键盘楔", en: "USB HID wedge" },
+    { id: "uart", zh: "TTL UART", en: "TTL UART" },
+    { id: "rs232", zh: "RS-232", en: "RS-232" },
+  ];
+  const [mode, setMode] = React.useState("uart");
+  const [step, setStep] = React.useState(0);
+  const samples = ["PO-7781", "MAT-WHEEL", "BIN-A01", "QTY*12"];
+  const barcode = samples[Math.min(step, samples.length - 1)];
+  const payload = {
+    eventId: "scan-" + (1000 + step),
+    code: barcode,
+    iface: mode,
+    ts: "2026-07-23T20:30:00Z",
+  };
+  const draw = (ctx, W, H) => {
+    const C = COLORS();
+    const boxes = [
+      { x: 20, w: 110, zh: "扫码头", en: "Engine" },
+      { x: 160, w: 120, zh: mode === "hid" ? "HID 芯片" : "串口芯片", en: mode === "hid" ? "HID IC" : "UART IC" },
+      { x: 310, w: 110, zh: "MCU/App", en: "MCU/App" },
+      { x: 450, w: 100, zh: "ERP API", en: "ERP API" },
+    ];
+    const scale = Math.min(1, (W - 40) / 560);
+    ctx.save();
+    ctx.translate((W - 560 * scale) / 2, 0);
+    ctx.scale(scale, scale);
+    boxes.forEach((b, i) => {
+      const y = 50, h = 56;
+      const active = step >= i;
+      ctx.fillStyle = active ? C.surface : C.bg;
+      ctx.strokeStyle = active ? C.accent : C.hair;
+      ctx.lineWidth = active ? 2.2 : 1.2;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(b.x, y, b.w, h, 6) : (() => { ctx.rect(b.x, y, b.w, h); })();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = C.ink; ctx.font = "13px 'Noto Sans SC', sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(L(b.zh, b.en), b.x + b.w / 2, y + h / 2);
+      if (i < boxes.length - 1) {
+        const x0 = b.x + b.w + 4, x1 = boxes[i + 1].x - 4, ym = y + h / 2;
+        ctx.strokeStyle = step > i ? C.accent : C.hair; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x0, ym); ctx.lineTo(x1, ym); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x1 - 6, ym - 4); ctx.lineTo(x1, ym); ctx.lineTo(x1 - 6, ym + 4); ctx.stroke();
+      }
+    });
+    // barcode glyph
+    ctx.fillStyle = C.ink;
+    for (let i = 0; i < 28; i++) {
+      const bw = (i % 3 === 0) ? 3 : 1.5;
+      ctx.fillRect(40 + i * 4, 18, bw, 22);
+    }
+    ctx.font = "11px 'JetBrains Mono', monospace"; ctx.textAlign = "left";
+    ctx.fillStyle = C.muted; ctx.fillText(barcode, 40, 14);
+    ctx.restore();
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={140} />
+      <div className="viz-ctrl" style={{ flexWrap: "wrap", gap: 8 }}>
+        {modes.map((m) => (
+          <button key={m.id} className={`btn ${mode === m.id ? "btn-primary" : ""}`}
+            style={{ padding: "6px 12px", fontSize: 12 }}
+            onClick={() => { setMode(m.id); setStep(0); }}>{L(m.zh, m.en)}</button>
+        ))}
+        <button className="btn btn-accent" style={{ padding: "6px 12px", fontSize: 12 }}
+          onClick={() => setStep((s) => (s + 1) % 4)}>
+          {L("模拟扫一下 →", "Simulate scan →")}
+        </button>
+      </div>
+      <div className="viz-readout" style={{ marginTop: 8 }}>
+        <div><b>{L("原始字符", "Raw")}</b>: <span className="mono">{barcode}{"\\r\\n"}</span>
+          {mode === "hid" ? L(" → 像键盘敲入", " → typed like a keyboard")
+            : mode === "uart" ? L(" → TX 接 MCU RX,共地", " → TX→MCU RX, common GND")
+            : L(" → 需电平转换(±12V)", " → needs level shift (±12V)")}
+        </div>
+        <pre className="mono" style={{ margin: "8px 0 0", fontSize: 12, whiteSpace: "pre-wrap" }}>{JSON.stringify(payload, null, 2)}</pre>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   H9 · Andon I/O state machine
+   ============================================================ */
+function AndonIoViz() {
+  const lang = (typeof useLang === "function") ? useLang() : "zh";
+  const L = (zh, en) => (lang === "en" ? en : zh);
+  const states = [
+    { id: "green", zh: "正常(绿)", en: "Normal (G)", color: "#2a8f4a", reason: "" },
+    { id: "call", zh: "呼叫(红)", en: "Call (R)", color: "#d62828", reason: "ANDON_PULL" },
+    { id: "ack", zh: "已响应(黄)", en: "Ack (Y)", color: "#d4a017", reason: "LEAD_ON_SITE" },
+    { id: "clear", zh: "关闭→绿", en: "Clear→G", color: "#2a8f4a", reason: "CLOSED" },
+  ];
+  const [si, setSi] = React.useState(0);
+  const st = states[si];
+  const draw = (ctx, W, H) => {
+    const C = COLORS();
+    const cx = W * 0.28, cy = H / 2;
+    // tower body
+    ctx.fillStyle = C.ink; ctx.fillRect(cx - 14, 30, 28, H - 50);
+    const colors = ["#d62828", "#d4a017", "#2a8f4a"];
+    colors.forEach((col, i) => {
+      const y = 40 + i * 48;
+      const on = (si === 1 && i === 0) || (si === 2 && i === 1) || ((si === 0 || si === 3) && i === 2);
+      ctx.beginPath(); ctx.arc(cx, y + 18, 16, 0, Math.PI * 2);
+      ctx.fillStyle = on ? col : C.surface; ctx.fill();
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.stroke();
+      if (on) {
+        ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(cx, y + 18, 26, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = 1;
+      }
+    });
+    // button
+    const bx = W * 0.62, by = H * 0.55;
+    ctx.beginPath(); ctx.arc(bx, by, 28, 0, Math.PI * 2);
+    ctx.fillStyle = si === 1 ? C.accent : C.surface; ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = C.ink; ctx.font = "12px 'Noto Sans SC', sans-serif";
+    ctx.textAlign = "center"; ctx.fillText(L("拉绳/按钮", "Cord / Btn"), bx, by + 50);
+    ctx.font = "11px 'JetBrains Mono', monospace"; ctx.fillStyle = C.muted;
+    ctx.fillText("GPIO INPUT_PULLUP", bx, by + 66);
+    // state arrow
+    ctx.strokeStyle = C.hair; ctx.beginPath();
+    ctx.moveTo(cx + 40, cy); ctx.lineTo(bx - 40, cy); ctx.stroke();
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={220} />
+      <div className="viz-ctrl" style={{ flexWrap: "wrap", gap: 8 }}>
+        {states.map((s, i) => (
+          <button key={s.id} className={`btn ${si === i ? "btn-accent" : ""}`}
+            style={{ padding: "6px 12px", fontSize: 12, borderColor: s.color }}
+            onClick={() => setSi(i)}>{L(s.zh, s.en)}</button>
+        ))}
+      </div>
+      <div className="viz-readout">
+        {L("状态", "State")}: <b style={{ color: st.color }}>{L(st.zh, st.en)}</b>
+        {st.reason && <> · reason=<span className="mono">{st.reason}</span></>}
+        {" · "}{L("消抖后再进状态机,再组 MQTT 载荷(见 EH4)。", "Debounce, then state machine, then MQTT payload (see EH4).")}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   H9 · Four-layer ERP integration stack
+   ============================================================ */
+function ErpStackViz() {
+  const lang = (typeof useLang === "function") ? useLang() : "zh";
+  const L = (zh, en) => (lang === "en" ? en : zh);
+  const layers = [
+    { id: 0, zh: "① 现场总线", en: "① Field bus", proto: "RS-485 / Modbus RTU",
+      detailZh: "差分多点、寄存器读写。帧里没有物料号/工单号。", detailEn: "Differential multi-drop, register R/W. No material/WO in the frame." },
+    { id: 1, zh: "② 边缘网关", en: "② Edge gateway", proto: "poll · map · validate · queue",
+      detailZh: "轮询从站 → 映射工单 → 校验 → 断网本地队列。", detailEn: "Poll slaves → map WO → validate → offline local queue." },
+    { id: 2, zh: "③ 消息层", en: "③ Messaging", proto: "MQTT QoS1 / HTTPS REST",
+      detailZh: "主题或 API 运载业务事件;至少一次投递 → 必须幂等。", detailEn: "Topics/APIs carry business events; at-least-once ⇒ must be idempotent." },
+    { id: 3, zh: "④ ERP 事务", en: "④ ERP transaction", proto: "报工 / 收货 / 停机码",
+      detailZh: "用 eventId 防重,校验主数据,过账后 ACK。", detailEn: "Idempotent on eventId, validate master data, ACK after post." },
+  ];
+  const scenes = [
+    { id: "a", zh: "A 计件报工", en: "A piece confirm", path: [0, 1, 2, 3] },
+    { id: "b", zh: "B 手持收货", en: "B handheld GR", path: [1, 2, 3] },
+    { id: "c", zh: "C OPC-UA 机床", en: "C OPC-UA machine", path: [1, 2, 3] },
+  ];
+  const [scn, setScn] = React.useState("a");
+  const [layer, setLayer] = React.useState(0);
+  const scene = scenes.find((s) => s.id === scn) || scenes[0];
+  const draw = (ctx, W, H) => {
+    const C = COLORS();
+    const pad = 16, rowH = (H - pad * 2) / 4;
+    layers.forEach((ly, i) => {
+      const y = pad + i * rowH;
+      const onPath = scene.path.includes(i);
+      const sel = layer === i;
+      ctx.globalAlpha = onPath ? 1 : 0.35;
+      ctx.fillStyle = sel ? C.surface : C.bg;
+      ctx.strokeStyle = sel ? C.accent : (onPath ? C.primary : C.hair);
+      ctx.lineWidth = sel ? 2.4 : 1.4;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(pad, y + 4, W - pad * 2, rowH - 10, 6);
+      else ctx.rect(pad, y + 4, W - pad * 2, rowH - 10);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = C.ink; ctx.font = "600 13px 'Noto Sans SC', sans-serif";
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      ctx.fillText(L(ly.zh, ly.en), pad + 14, y + rowH / 2 - 6);
+      ctx.font = "11px 'JetBrains Mono', monospace"; ctx.fillStyle = C.muted;
+      ctx.fillText(ly.proto, pad + 14, y + rowH / 2 + 12);
+      if (onPath && i < 3 && scene.path.includes(i + 1)) {
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 2; ctx.globalAlpha = 1;
+        const x = W - pad - 28, y0 = y + rowH - 6, y1 = y + rowH + 4;
+        ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    });
+  };
+  const cur = layers[layer];
+  return (
+    <div>
+      <Canvas draw={draw} height={240} />
+      <div className="viz-ctrl" style={{ flexWrap: "wrap", gap: 8 }}>
+        {scenes.map((s) => (
+          <button key={s.id} className={`btn ${scn === s.id ? "btn-accent" : ""}`}
+            style={{ padding: "6px 12px", fontSize: 12 }}
+            onClick={() => { setScn(s.id); setLayer(s.path[0]); }}>{L(s.zh, s.en)}</button>
+        ))}
+      </div>
+      <div className="viz-ctrl" style={{ flexWrap: "wrap", gap: 8, marginTop: 6 }}>
+        {layers.map((ly) => (
+          <button key={ly.id} className={`btn ${layer === ly.id ? "btn-primary" : ""}`}
+            style={{ padding: "4px 10px", fontSize: 11, opacity: scene.path.includes(ly.id) ? 1 : 0.4 }}
+            onClick={() => setLayer(ly.id)}>{L(ly.zh, ly.en)}</button>
+        ))}
+      </div>
+      <div className="viz-readout">
+        <b>{L(cur.zh, cur.en)}</b> · <span className="mono">{cur.proto}</span><br />
+        {L(cur.detailZh, cur.detailEn)}
+        {scn === "b" && layer === 0 && <> {L("(手持收货常跳过 485,枪走 USB/Wi-Fi。)", "(Handheld GR often skips 485 — gun is USB/Wi-Fi.)")}</>}
+        {scn === "c" && layer === 0 && <> {L("(OPC-UA 多在车间以太网,不是 485。)", "(OPC-UA usually sits on plant Ethernet, not 485.)")}</>}
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- registry & dispatch ---------------- */
 const VIZ = {
   careBedTopology: () => <CareBedTopologyViz />,
@@ -1269,6 +1560,10 @@ const VIZ = {
   pressureMap: () => <PressureMapViz />,
   emuPower: () => <EmuPowerViz />,
   consoleModel: () => <ConsoleModelViz />,
+  erpFloorMap: () => <ErpFloorMapViz />,
+  scanHid: () => <ScanHidViz />,
+  andonIo: () => <AndonIoViz />,
+  erpStack: () => <ErpStackViz />,
 };
 
 function Viz({ name }) {
