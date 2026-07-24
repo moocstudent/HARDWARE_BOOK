@@ -557,9 +557,14 @@ const ProjectsPage = ({ nav }) => {
                 <div className="proj-foot">
                   <span className="mono">{cs.length} {t("proj_chapters")} · {hours} {t("hours_unit")}</span>
                   <span className="proj-actions">
-                    {(m.id === "h7" || m.id === "h9") && (
+                    {(m.id === "h7" || m.id === "h8" || m.id === "h9") && (
                       <button className="btn" style={{ padding: "6px 12px", fontSize: 12 }}
-                        onClick={(e) => { e.stopPropagation(); nav("#/bom"); }}>
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (m.id === "h8") nav("#/bom/console");
+                          else if (m.id === "h9") nav("#/bom/erp");
+                          else nav("#/bom");
+                        }}>
                         {t("proj_bom_link")}
                       </button>
                     )}
@@ -587,10 +592,22 @@ const ProjectsPage = ({ nav }) => {
 };
 
 // ============== BOM (printable shopping list) ==============
-const BomPage = ({ nav }) => {
+const BomPage = ({ nav, focus }) => {
   const t = useT();
   const lang = useLang();
   const [starterOnly, setStarterOnly] = React.useState(false);
+  React.useEffect(() => {
+    const id = focus === "console" ? "inv-console"
+      : focus === "erp" ? "inv-erp"
+      : focus === "bed" ? "inv-bed"
+      : null;
+    if (!id) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [focus]);
   const filterGroups = (src) => (src || []).map((g) => ({
     ...g,
     items: starterOnly ? g.items.filter((it) => it.starter) : g.items,
@@ -664,11 +681,11 @@ const BomPage = ({ nav }) => {
           <div className="bom-disclaimer">{t("bom_disclaimer")}</div>
         </section>
 
-        <h2 className="inv-section-head"><span>{t("inv_bed_head")}</span></h2>
+        <h2 id="inv-bed" className="inv-section-head"><span>{t("inv_bed_head")}</span></h2>
         {renderBomGroups(groups)}
         <p className="bom-note small">{t("bom_starter_note")}</p>
 
-        <h2 className="inv-section-head"><span>{t("inv_console_head")}</span></h2>
+        <h2 id="inv-console" className="inv-section-head"><span>{t("inv_console_head")}</span></h2>
         <p className="bom-sub" style={{ marginTop: 0 }}>{t("inv_console_sub")}</p>
         <table className="bom-table console-table">
           <thead>
@@ -707,7 +724,7 @@ const BomPage = ({ nav }) => {
           </a>{lang === "en" ? "." : "。"}
         </p>
 
-        <h2 className="inv-section-head"><span>{t("inv_erp_head")}</span></h2>
+        <h2 id="inv-erp" className="inv-section-head"><span>{t("inv_erp_head")}</span></h2>
         <p className="bom-sub" style={{ marginTop: 0 }}>{t("inv_erp_sub")}</p>
         {renderBomGroups(erpGroups)}
         <p className="bom-note small">

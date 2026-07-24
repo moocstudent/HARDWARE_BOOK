@@ -118,12 +118,15 @@ const App = () => {
   const [theme, toggleTheme] = useTheme();
 
   let route = "home";
-  let courseId = null, moduleId = null;
+  let courseId = null, moduleId = null, bomFocus = null;
   if (hash.startsWith("#/c/")) { route = "course"; courseId = hash.slice(4); }
   else if (hash.startsWith("#/m/")) { route = "module"; moduleId = hash.slice(4); }
   else if (hash === "#/about") { route = "about"; }
   else if (hash === "#/projects") { route = "projects"; }
-  else if (hash === "#/bom") { route = "bom"; }
+  else if (hash === "#/bom" || hash.startsWith("#/bom/")) {
+    route = "bom";
+    bomFocus = hash.startsWith("#/bom/") ? hash.slice(6) : null;
+  }
 
   const screenLabel = (() => {
     if (route === "home") return "01 Home · Roadmap";
@@ -145,7 +148,7 @@ const App = () => {
         {route === "course" && <ChapterPage courseId={courseId} progress={progress} toggleProgress={toggleProgress} nav={nav} />}
         {route === "about" && <AboutPage nav={nav} />}
         {route === "projects" && <ProjectsPage nav={nav} />}
-        {route === "bom" && <BomPage nav={nav} />}
+        {route === "bom" && <BomPage nav={nav} focus={bomFocus} />}
       </div>
     </LangContext.Provider>
   );
